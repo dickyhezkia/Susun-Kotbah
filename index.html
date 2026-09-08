@@ -334,6 +334,8 @@
   .savedhead{display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:14px}
   .savedhead .sub{margin:0}
   .savedhead .addbtn{flex:none; display:inline-flex; align-items:center; gap:5px; padding:8px 12px}
+  .savedacts{flex:none; display:flex; flex-direction:column; align-items:flex-end; gap:6px}
+  .savedacts .tiny{padding:5px 10px; font-size:11px; color:var(--ink-soft)}
 
   .filters{gap:6px; margin:0 0 16px; overflow-x:auto; flex-wrap:nowrap; -webkit-overflow-scrolling:touch; padding-bottom:2px}
   .filters::-webkit-scrollbar{display:none}
@@ -1217,7 +1219,12 @@ TAIL
     var head='<aside class="hist fade">'+
       '<div class="savedhead"><div><h2>Tersimpan</h2>'+
         '<p class="sub">'+(cloud?"Tersimpan di cloud &middot; sinkron di semua perangkat":"Tersimpan di perangkat ini")+'</p></div>'+
-        '<button type="button" class="ghost addbtn" id="skAdd">+ Tambah</button></div>';
+        '<div class="savedacts">'+
+          '<button type="button" class="ghost addbtn" id="skAdd">+ Tambah</button>'+
+          (l.length?'<button type="button" class="ghost tiny" id="skBackup" title="Unduh semua naskah sebagai satu file cadangan (JSON)">&#8595; Cadangkan</button>':'')+
+          '<button type="button" class="ghost tiny" id="skRestore" title="Pulihkan naskah dari file cadangan">&#8593; Pulihkan</button>'+
+          '<input type="file" id="skRestoreFile" accept="application/json,.json" hidden>'+
+        '</div></div>';
     if(!l.length){
       savedStage.innerHTML=head+'<p class="empty">'+BOOKMARK_SVG+'Belum ada naskah.<br>Susun di tab &ldquo;Susun&rdquo;, atau <b>+ Tambah</b> naskah yang sudah jadi.</p></aside>';
       wireSavedHead(); return;
@@ -1268,6 +1275,43 @@ TAIL
   }
   function wireSavedHead(){
     var a=$("#skAdd"); if(a) a.onclick=renderAddForm;
+    var b=$("#skBackup"); if(b) b.onclick=backupAll;
+    var r=$("#skRestore"), rf=$("#skRestoreFile");
+    if(r&&rf){ r.onclick=function(){ rf.click(); }; rf.onchange=function(){ var f=rf.files&&rf.files[0]; rf.value=""; if(f) restoreFrom(f); }; }
+  }
+  async function backupAll(){
+    var list=(histCache||[]).slice();
+    if(!list.length){ alert("Belum ada naskah untuk dicadangkan."); return; }
+    var dump={ app:"Susun Khotbah", version:1, savedAt:new Date().toISOString(), count:list.length, sermons:list };
+    var json=JSON.stringify(dump,null,1);
+    var stamp=new Date().toISOString().slice(0,16).replace(/[:T]/g,"-");
+    var fname="susun-khotbah-cadangan-"+stamp+".json";
+    var blob=new Blob([json],{type:"application/json"});
+    try{
+      if(!dlFn && window.claude && window.claude.use){ try{ dlFn=await window.claude.use("downloads"); }catch(e){} }
+      if(dlFn){ await dlFn.save({ filename:fname, data:blob }); alert("Cadangan "+list.length+" naskah tersimpan."); return; }
+    }catch(e){ if(e&&e.code==="declined") return; console.error(e); }
+    var u=URL.createObjectURL(blob), a2=document.createElement("a");
+    a2.href=u; a2.download=fname; document.body.appendChild(a2); a2.click();
+    setTimeout(function(){ URL.revokeObjectURL(u); a2.remove(); },4000);
+    alert("Cadangan "+list.length+" naskah diunduh — simpan ke iCloud / Google Drive.");
+  }
+  function restoreFrom(file){
+    var rd=new FileReader();
+    rd.onload=function(){
+      var d; try{ d=JSON.parse(rd.result); }catch(e){ alert("File bukan JSON yang sah."); return; }
+      var rows = Array.isArray(d) ? d : (d && Array.isArray(d.sermons) ? d.sermons : null);
+      if(!rows){ alert("File ini bukan cadangan Susun Khotbah."); return; }
+      var have={}; (histCache||[]).forEach(function(x){ have[x.id]=true; });
+      var add=rows.map(normItem).filter(function(x){ return x && x.id && x.text && !have[x.id]; });
+      if(!add.length){ alert("Tidak ada naskah baru untuk dipulihkan (semua sudah ada)."); return; }
+      if(!window.confirm("Pulihkan "+add.length+" naskah dari cadangan? Naskah yang sudah ada tidak diubah.")) return;
+      add.forEach(function(it){ histCache.push(it); storeDo(Store.add(it)); });
+      histCache.sort(function(a,b){ return String(b.ts||"").localeCompare(String(a.ts||"")); });
+      persistLS(); refreshHistCount(); renderSaved();
+      alert(add.length+" naskah dipulihkan.");
+    };
+    rd.readAsText(file);
   }
   function renderAddForm(){
     savedStage.innerHTML=
