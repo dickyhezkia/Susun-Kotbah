@@ -1,0 +1,1412 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#E3E6EA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E131A" media="(prefers-color-scheme: dark)">
+<meta name="description" content="Susun naskah khotbah gaya Gereja JB3 — aplikasi di HP.">
+<style>[hidden]{display:none!important}img{max-width:100%}</style>
+<title>Susun Khotbah</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Spectral:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    --ground:#E3E6EA; --surface:#F3F5F7; --raised:#FBFCFD;
+    --ink:#1B2530; --ink-soft:#485560; --ink-faint:#7B8994;
+    --line:#C9D0D7; --line-soft:#DCE1E6;
+    --accent:#2C468A; --accent-ink:#20356B; --accent-soft:#DBE1F0; --on-accent:#FBFCFD;
+    --rubric:#8F2F2B; --rubric-soft:#EDDAD8;
+    --serif:"Libre Caslon Text",Georgia,"Times New Roman",serif;
+    --text:"Spectral",Georgia,"Times New Roman",serif;
+    --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+    --maxw:40rem;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#11161D; --surface:#1A212B; --raised:#212A35;
+      --ink:#DCE2E8; --ink-soft:#9AA6B1; --ink-faint:#6C7883;
+      --line:#2B3540; --line-soft:#222B35;
+      --accent:#8AA8E6; --accent-ink:#AAC0EE; --accent-soft:#26324A; --on-accent:#12171E;
+      --rubric:#DA867F; --rubric-soft:#382A29;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#11161D; --surface:#1A212B; --raised:#212A35;
+    --ink:#DCE2E8; --ink-soft:#9AA6B1; --ink-faint:#6C7883;
+    --line:#2B3540; --line-soft:#222B35;
+    --accent:#8AA8E6; --accent-ink:#AAC0EE; --accent-soft:#26324A; --on-accent:#12171E;
+    --rubric:#DA867F; --rubric-soft:#382A29;
+  }
+
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; background:var(--ground); color:var(--ink);
+    font-family:var(--text); font-size:17px; line-height:1.62;
+    font-feature-settings:"liga" 1,"onum" 1; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 22px 96px}
+
+  .appbar{position:sticky; top:0; z-index:30; background:var(--ground); margin:0 -22px; padding:16px 22px 0; border-bottom:1px solid var(--line)}
+  .appbar .brand h1{font-family:var(--serif); font-weight:700; letter-spacing:.005em; font-size:23px; line-height:1; margin:0}
+  .tabnav{display:flex; gap:4px; margin-top:13px}
+  .tabnav button{flex:1; background:none; border:none; border-radius:0; border-bottom:2px solid transparent; margin-bottom:-1px; padding:11px 6px 12px; font-family:var(--mono); font-size:11px; font-weight:500; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-faint); display:inline-flex; align-items:center; justify-content:center; gap:6px}
+  .tabnav button[aria-selected="true"]{color:var(--accent); border-bottom-color:var(--accent)}
+  .tabnav button:hover{color:var(--ink)}
+  .tabnav .badge{font-size:10px; letter-spacing:0; background:var(--accent-soft); color:var(--accent-ink); border-radius:9px; padding:1px 6px; min-width:16px; text-align:center}
+  .tabnav .badge[hidden]{display:none}
+  #view-compose[hidden],#view-saved[hidden]{display:none}
+  .tag{margin:18px 0 0; font-size:13.5px; line-height:1.5; color:var(--ink-soft)}
+  .a2hs{display:flex; align-items:flex-start; gap:10px; margin-top:14px; padding:10px 12px; background:var(--surface); border:1px solid var(--line-soft); border-radius:6px; font-family:var(--mono); font-size:10.5px; line-height:1.6; letter-spacing:.02em; color:var(--ink-soft)}
+  .a2hs b{color:var(--ink); font-weight:500}
+  .a2hs button{background:none; border:none; color:var(--ink-faint); font-size:15px; line-height:1; padding:0 2px; flex:none}
+  .a2hs[hidden]{display:none}
+
+  .eyebrow{font-family:var(--mono); font-size:10.5px; font-weight:500; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-faint); display:block}
+  .eyebrow .opt{color:var(--ink-faint); opacity:.7}
+
+  button{font-family:var(--mono); cursor:pointer; border-radius:3px; transition:background .13s,border-color .13s,color .13s}
+  button:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+  .primary{background:var(--accent); color:var(--on-accent); border:1px solid var(--accent); font-size:12.5px; font-weight:500; letter-spacing:.06em; text-transform:uppercase; padding:10px 20px}
+  .primary:hover{background:var(--accent-ink); border-color:var(--accent-ink)}
+  .primary:disabled{opacity:.42; cursor:not-allowed}
+  .ghost{background:transparent; color:var(--ink-soft); border:1px solid var(--line); font-size:11.5px; font-weight:500; letter-spacing:.06em; text-transform:uppercase; padding:9px 14px}
+  .ghost:hover{border-color:var(--ink-faint); color:var(--ink)}
+  .ghost:disabled{opacity:.5; cursor:progress}
+
+  .composer{padding:22px 0 24px; border-bottom:1px solid var(--line)}
+  .field{margin-top:16px}
+  .field:first-child{margin-top:0}
+  .field textarea,.field input{
+    width:100%; margin-top:8px; resize:none; overflow:hidden;
+    font-family:var(--serif); color:var(--ink);
+    background:var(--raised); border:1px solid var(--line); border-radius:4px; padding:12px 14px;
+  }
+  .field textarea#ref{font-size:20px; line-height:1.4}
+  .field input,.field textarea#topic{font-size:16px}
+  .field textarea#points,.field textarea#old{font-size:14.5px; line-height:1.55; font-family:var(--text)}
+  .field textarea#points{min-height:74px}
+  .field textarea#old{min-height:66px}
+  .field textarea::placeholder,.field input::placeholder{color:var(--ink-faint); font-style:italic}
+  .field textarea:focus,.field input:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft)}
+
+  .points-box{margin-top:16px; padding:14px; border:1px solid var(--line); border-radius:5px; background:var(--surface)}
+  .points-box .field{margin-top:0}
+  .points-box .field + .upload{margin-top:12px}
+  .upload .up-btn{
+    display:inline-flex; align-items:center; gap:8px;
+    background:var(--raised); color:var(--ink-soft); border:1px dashed var(--line-strong,var(--ink-faint));
+    font-size:11px; font-weight:500; letter-spacing:.05em; text-transform:uppercase; padding:9px 14px; border-radius:4px;
+  }
+  .upload .up-btn:hover{color:var(--ink); border-color:var(--accent)}
+  .upload input[type=file]{position:absolute; width:1px; height:1px; opacity:0; pointer-events:none}
+  .upload .up-note{margin-top:8px; font-family:var(--mono); font-size:10px; line-height:1.5; color:var(--ink-faint); letter-spacing:.02em}
+  .upload .up-note[hidden]{display:none}
+  .thumbs{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px}
+  .thumb{position:relative; width:58px; height:58px; border-radius:4px; overflow:hidden; border:1px solid var(--line)}
+  .thumb img{width:100%; height:100%; object-fit:cover; display:block}
+  .thumb button{
+    position:absolute; top:2px; right:2px; width:17px; height:17px; line-height:15px; text-align:center;
+    background:rgba(0,0,0,.6); color:#fff; border:none; border-radius:50%; font-size:12px; padding:0;
+  }
+
+  .seg{display:inline-flex; margin-top:9px; border:1px solid var(--line); border-radius:4px; overflow:hidden; background:var(--raised)}
+  .seg button{
+    background:transparent; border:none; border-radius:0; padding:9px 18px;
+    font-family:var(--mono); font-size:11px; font-weight:500; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-faint);
+  }
+  .seg button + button{border-left:1px solid var(--line)}
+  .seg button[aria-pressed="true"]{background:var(--accent); color:var(--on-accent)}
+  .field .help{margin-top:8px; font-family:var(--mono); font-size:10px; line-height:1.55; color:var(--ink-faint); letter-spacing:.01em}
+  .field .help[hidden]{display:none}
+
+  .advToggle{margin-top:14px; background:none; border:none; padding:0; font-family:var(--mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--accent)}
+  .advToggle:hover{color:var(--accent-ink)}
+  #adv[hidden]{display:none}
+
+  .composer-actions{display:flex; align-items:center; justify-content:space-between; gap:14px; margin-top:18px; flex-wrap:wrap}
+  .hint{font-family:var(--mono); font-size:11px; color:var(--ink-faint); letter-spacing:.02em}
+  .hint.warn{color:var(--rubric)}
+  .btns{display:flex; gap:9px; margin-left:auto}
+
+  .intro{padding:30px 0 8px; color:var(--ink-soft)}
+  .intro > p{margin:0 0 16px; font-size:16px}
+  ol.movements{margin:0; padding:0; list-style:none; counter-reset:mv}
+  ol.movements li{counter-increment:mv; position:relative; padding:12px 0 12px 42px; border-top:1px solid var(--line-soft); font-size:15px; line-height:1.5}
+  ol.movements li:first-child{border-top:none}
+  ol.movements li::before{content:counter(mv); position:absolute; left:0; top:12px; font-family:var(--serif); font-size:19px; color:var(--accent); width:28px; text-align:right}
+  ol.movements li b{color:var(--ink); font-weight:500; font-family:var(--serif)}
+
+  .thinking{display:flex; align-items:center; gap:11px; padding:34px 0 10px; font-family:var(--mono); font-size:12.5px; letter-spacing:.06em; color:var(--ink-faint); text-transform:uppercase}
+  .thinking .dot{width:7px; height:7px; border-radius:50%; background:var(--accent); animation:pulse 1.15s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:.25; transform:scale(.8)} 50%{opacity:1; transform:scale(1)}}
+
+  .rbar{display:flex; align-items:baseline; justify-content:space-between; gap:14px; flex-wrap:wrap; padding:26px 0 6px}
+  .rbar .ref{font-family:var(--serif); font-size:15px; font-variant:small-caps; letter-spacing:.04em; color:var(--rubric)}
+  .rbar .acts{display:flex; gap:7px; flex-wrap:wrap}
+  .rbar .acts button{font-size:10px; padding:6px 10px}
+
+  .analysis{padding:8px 0 0}
+  .analysis h1{font-family:var(--serif); font-weight:700; font-size:25px; line-height:1.2; margin:6px 0 4px; text-wrap:balance}
+  .analysis h2{font-family:var(--serif); font-weight:700; font-size:20px; line-height:1.25; margin:34px 0 12px; padding-top:22px; border-top:1px solid var(--line); display:flex; gap:13px; align-items:baseline; text-wrap:balance}
+  .analysis h1 + h2,.analysis h2:first-child{border-top:none; padding-top:0; margin-top:14px}
+  .analysis h2 .n{flex:none; font-weight:400; font-size:16px; color:var(--accent); font-variant-numeric:lining-nums; min-width:1.1em}
+  .analysis h3{font-family:var(--mono); font-weight:500; font-size:11px; letter-spacing:.13em; text-transform:uppercase; color:var(--ink-faint); margin:20px 0 7px}
+  .analysis p{margin:0 0 13px}
+  .analysis ul{margin:0 0 14px; padding-left:0; list-style:none}
+  .analysis li{position:relative; padding-left:20px; margin:0 0 7px; line-height:1.55}
+  .analysis li::before{content:""; position:absolute; left:3px; top:.72em; width:6px; height:1px; background:var(--ink-faint)}
+  .analysis blockquote{margin:0 0 15px; padding:3px 0 3px 18px; border-left:2px solid var(--accent-soft); font-family:var(--serif); font-size:18px; line-height:1.5; font-style:italic; color:var(--ink)}
+  .analysis strong{font-weight:500; color:var(--ink)}
+  .analysis em{font-style:italic}
+  .analysis code{font-family:var(--mono); font-size:.86em; background:var(--surface); padding:1px 5px; border-radius:3px; border:1px solid var(--line-soft)}
+  .analysis .trunc{margin-top:20px; font-family:var(--mono); font-size:11.5px; color:var(--rubric); letter-spacing:.03em}
+  .analysis .err{margin-top:24px; padding:14px 16px; border:1px solid var(--rubric); background:var(--rubric-soft); border-radius:4px; font-size:14px; color:var(--ink); line-height:1.5}
+
+  .hist{padding:24px 0 0; border-top:1px solid var(--line); margin-top:8px}
+  .hist h2{font-family:var(--serif); font-size:18px; font-weight:700; margin:0 0 4px}
+  .hist .sub{font-family:var(--mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint); margin:0 0 14px}
+  .hist ul{list-style:none; margin:0; padding:0}
+  .hist li{display:flex; flex-wrap:wrap; align-items:baseline; gap:5px 10px; padding:13px 0; border-top:1px solid var(--line-soft)}
+  .hist li:first-child{border-top:none}
+  .hist .open{flex:1 1 60%; text-align:left; background:none; border:none; padding:0; font-family:var(--serif); font-size:16px; color:var(--ink); letter-spacing:.01em; text-transform:none}
+  .hist .open:hover{color:var(--accent)}
+  .hist .open small{display:block; font-family:var(--mono); font-size:10px; color:var(--ink-faint); letter-spacing:.03em; margin-top:2px; text-transform:none}
+  .hist .when{font-family:var(--mono); font-size:10.5px; color:var(--ink-faint); flex:none}
+  .hist .del{flex:none; background:none; border:none; color:var(--ink-faint); font-size:15px; padding:0 4px; line-height:1}
+  .hist .del:hover{color:var(--rubric)}
+  .hist .tags{flex:1 1 100%; display:flex; flex-wrap:wrap; align-items:center; gap:7px; margin-top:1px}
+  .hist .cat{font-family:var(--mono); font-size:9px; letter-spacing:.09em; text-transform:uppercase; color:var(--accent-ink); background:var(--accent-soft); padding:2px 7px; border-radius:3px}
+  .hist .pchip{font-family:var(--mono); font-size:9.5px; letter-spacing:.04em; color:var(--ink-faint)}
+  .hist .pwhere{font-family:var(--text); font-size:12px; font-style:italic; color:var(--ink-faint)}
+  .hist .empty{font-size:14px; color:var(--ink-faint); font-style:italic; padding:8px 0}
+
+  .filters{display:flex; flex-wrap:wrap; gap:6px; margin:0 0 16px}
+  .filters button{background:var(--raised); border:1px solid var(--line); color:var(--ink-soft); font-family:var(--mono); font-size:10px; letter-spacing:.03em; text-transform:uppercase; padding:6px 10px; border-radius:3px}
+  .filters button[aria-pressed="true"]{background:var(--accent); color:var(--on-accent); border-color:var(--accent)}
+
+  .sermon-meta{margin-top:28px; padding-top:20px; border-top:1px solid var(--line)}
+  .sermon-meta[hidden]{display:none}
+  .sermon-meta .mrow{margin-top:18px}
+  .sermon-meta .mrow:first-child{margin-top:0}
+  .sermon-meta label{margin-bottom:7px}
+  .sel{width:100%; margin-top:8px; font-family:var(--serif); font-size:16px; color:var(--ink); background:var(--raised); border:1px solid var(--line); border-radius:4px; padding:12px 14px; -webkit-appearance:none; appearance:none}
+  .sel:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft)}
+  .sermon-meta .sel{max-width:17rem}
+  .preached-list{list-style:none; margin:9px 0 0; padding:0}
+  .preached-list li{font-family:var(--text); font-size:14px; padding:5px 0; color:var(--ink-soft); display:flex; align-items:baseline; gap:8px}
+  .preached-list li.none{color:var(--ink-faint); font-style:italic}
+  .preached-list li span{font-family:var(--mono); font-size:11px; color:var(--ink-faint)}
+  .preached-list li button{background:none; border:none; color:var(--ink-faint); font-size:14px; padding:0 3px; line-height:1}
+  .preached-list li button:hover{color:var(--rubric)}
+  .preach-add{display:flex; flex-wrap:wrap; gap:8px; margin-top:11px}
+  .preach-add input{font-family:var(--text); font-size:14px; color:var(--ink); background:var(--raised); border:1px solid var(--line); border-radius:4px; padding:9px 11px}
+  .preach-add input:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft)}
+  .preach-add input#pPlace{flex:1 1 12rem}
+  .preach-add button{flex:none}
+
+  .editor{width:100%; font-family:var(--text); font-size:15.5px; line-height:1.65; color:var(--ink); background:var(--raised); border:1px solid var(--accent); border-radius:5px; padding:14px; min-height:58vh; resize:vertical; box-shadow:0 0 0 3px var(--accent-soft)}
+  .editor:focus{outline:none}
+
+  .foot{margin-top:40px; padding-top:16px; border-top:1px solid var(--line-soft); font-family:var(--mono); font-size:10.5px; letter-spacing:.04em; color:var(--ink-faint); line-height:1.7}
+
+  @media (max-width:480px){
+    body{font-size:16px}
+    .wrap{padding:0 16px 72px}
+    .appbar{margin:0 -16px; padding-left:16px; padding-right:16px}
+    .appbar .brand h1{font-size:21px}
+    .tabnav button{font-size:10px; letter-spacing:.03em}
+    .field textarea#ref{font-size:18px}
+    .btns{width:100%; margin-left:0}
+    .btns .primary{flex:1}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation:none !important; transition:none !important}}
+  .fade{animation:fade .4s ease both}
+  @keyframes fade{from{opacity:0; transform:translateY(4px)} to{opacity:1; transform:none}}
+
+  /* ======================================================================
+     APP SHELL v2 — overrides above (later rules win at equal specificity)
+     ====================================================================== */
+  :root{
+    --ok:#3E7A5E;
+    --shadow:0 1px 2px rgba(20,30,45,.05), 0 10px 26px -12px rgba(20,30,45,.16);
+    --shadow-bar:0 -10px 30px -16px rgba(20,30,45,.28);
+    --topbar:54px; --tabbar:62px; --safe-b:env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+    --ground:#0E131A; --surface:#161D26; --raised:#1E2731; --ok:#6FB08C;
+    --shadow:0 1px 2px rgba(0,0,0,.35), 0 12px 28px -12px rgba(0,0,0,.55);
+    --shadow-bar:0 -12px 34px -18px rgba(0,0,0,.7);
+  }}
+  :root[data-theme="dark"]{
+    --ground:#0E131A; --surface:#161D26; --raised:#1E2731; --ok:#6FB08C;
+    --shadow:0 1px 2px rgba(0,0,0,.35), 0 12px 28px -12px rgba(0,0,0,.55);
+    --shadow-bar:0 -12px 34px -18px rgba(0,0,0,.7);
+  }
+
+  body{ background:var(--ground); }
+  .wrap{ max-width:34rem; padding:0 16px calc(var(--tabbar) + var(--safe-b) + 26px); }
+
+  /* app bar */
+  .appbar{
+    position:sticky; top:0; z-index:40; display:flex; align-items:center; justify-content:space-between; gap:12px;
+    height:var(--topbar); margin:0 -16px; padding:0 16px 0;
+    background:var(--ground);
+    background:color-mix(in srgb, var(--ground) 85%, transparent);
+    -webkit-backdrop-filter:saturate(1.7) blur(14px); backdrop-filter:saturate(1.7) blur(14px);
+    border-bottom:1px solid var(--line);
+  }
+  .appbar .brand{display:flex; align-items:baseline; gap:0}
+  .appbar .brand h1{font-family:var(--serif); font-weight:700; font-size:19px; line-height:1; margin:0}
+  .appstatus{font-family:var(--mono); font-size:9px; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-faint); display:flex; align-items:center; gap:5px; white-space:nowrap}
+  .appstatus::before{content:""; width:6px; height:6px; border-radius:50%; background:currentColor; opacity:.55; flex:none}
+  .appstatus.ok{color:var(--ok)} .appstatus.ok::before{opacity:1}
+  .appstatus.err{color:var(--rubric)} .appstatus.err::before{opacity:1}
+  .appstatus.busy{color:var(--accent)}
+  .appstatus:empty{display:none}
+
+  /* the old inline top tabs -> hidden; replaced by bottom .tabbar */
+  .appbar .tabnav{display:none !important}
+
+  /* bottom tab bar */
+  .tabbar{
+    position:fixed; left:0; right:0; bottom:0; z-index:45;
+    display:flex; gap:4px; justify-content:center; align-items:stretch;
+    margin:0; padding:7px 10px calc(7px + var(--safe-b));
+    background:var(--ground);
+    background:color-mix(in srgb, var(--ground) 90%, transparent);
+    -webkit-backdrop-filter:saturate(1.7) blur(14px); backdrop-filter:saturate(1.7) blur(14px);
+    border-top:1px solid var(--line); box-shadow:var(--shadow-bar);
+  }
+  .tabbar button{
+    position:relative; flex:1; max-width:10rem; display:flex; flex-direction:column; align-items:center; gap:3px;
+    background:none; border:none; border-radius:13px; padding:7px 4px 5px;
+    font-family:var(--mono); font-size:9.5px; font-weight:600; letter-spacing:.07em; text-transform:uppercase;
+    color:var(--ink-faint);
+  }
+  .tabbar button svg{width:23px; height:23px; stroke:currentColor; fill:none; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round}
+  .tabbar button[aria-selected="true"]{color:var(--accent); background:var(--accent-soft)}
+  .tabbar button:active{transform:scale(.93)}
+  .tabbar .badge{
+    position:absolute; top:2px; left:50%; margin-left:6px;
+    font-family:var(--mono); font-size:9px; font-weight:700; line-height:1;
+    background:var(--accent); color:var(--on-accent); border-radius:9px; padding:2px 5px; min-width:15px; text-align:center;
+  }
+  .tabbar .badge[hidden]{display:none}
+
+  .view{padding-top:16px}
+  .view[hidden]{display:none}
+
+  /* generic card */
+  .card{background:var(--raised); border:1px solid var(--line-soft); border-radius:16px; padding:16px 15px; box-shadow:var(--shadow); margin:0 0 14px}
+
+  .a2hs{border-radius:12px; margin:2px 0 16px}
+
+  /* inputs a touch rounder / app-y */
+  .field textarea,.field input,.sel{border-radius:10px; background:var(--surface)}
+  .primary{border-radius:11px; padding:13px 22px; font-weight:600}
+  .ghost{border-radius:9px; background:var(--raised)}
+  button{border-radius:9px}
+  .seg{border-radius:10px}
+  .points-box{border-radius:14px}
+
+  .composer[hidden]{display:none}
+  .composer-actions{flex-direction:column; align-items:stretch; gap:10px}
+  .composer-actions .hint{text-align:center; order:2}
+  .composer-actions .btns{margin-left:0; order:1}
+  .composer-actions .btns .primary{flex:1}
+
+  /* result bar */
+  .rbar{padding:2px 0 12px; margin-bottom:8px; border-bottom:1px solid var(--line-soft); align-items:center}
+  .rbar .back{
+    background:none; border:none; padding:4px 8px 4px 0; color:var(--accent);
+    font-family:var(--mono); font-size:11px; letter-spacing:.04em; display:inline-flex; align-items:center; gap:5px;
+  }
+  .rbar .back svg{width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:2}
+
+  /* ---- saved list: cards ---- */
+  .hist{border-top:none; padding-top:4px; margin-top:0}
+  .hist h2{font-family:var(--serif); font-size:21px; margin:0 0 3px}
+  .savedhead{display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:14px}
+  .savedhead .sub{margin:0}
+  .savedhead .addbtn{flex:none; display:inline-flex; align-items:center; gap:5px; padding:8px 12px}
+
+  .filters{gap:6px; margin:0 0 16px; overflow-x:auto; flex-wrap:nowrap; -webkit-overflow-scrolling:touch; padding-bottom:2px}
+  .filters::-webkit-scrollbar{display:none}
+  .filters button{flex:none; border-radius:20px; padding:7px 13px; background:var(--raised)}
+  .filters button[aria-pressed="true"]{background:var(--accent); color:var(--on-accent); border-color:var(--accent)}
+
+  .hist ul{display:flex; flex-direction:column; gap:10px}
+  .hist li{
+    display:block; position:relative; padding:0; border-top:none;
+    background:var(--raised); border:1px solid var(--line-soft); border-radius:14px;
+    box-shadow:var(--shadow); overflow:hidden;
+  }
+  .hist li::before{content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--catc,var(--ink-faint))}
+  .hist .open{
+    display:block; width:100%; padding:14px 40px 12px 18px; text-align:left;
+    font-family:var(--serif); font-size:16.5px; line-height:1.32; color:var(--ink);
+  }
+  .hist .open small{display:block; font-family:var(--mono); font-size:9.5px; letter-spacing:.03em; color:var(--ink-faint); margin-top:4px; text-transform:none}
+  .hist .del{
+    position:absolute; top:8px; right:6px; width:28px; height:28px; border-radius:8px;
+    background:none; border:none; color:var(--ink-faint); font-size:17px; line-height:1;
+  }
+  .hist .del:hover{color:var(--rubric); background:var(--rubric-soft)}
+  .hist .tags{
+    display:flex; flex-wrap:wrap; align-items:center; gap:6px 9px;
+    margin:0; padding:0 18px 13px; border:none;
+  }
+  .hist .cat{
+    font-family:var(--mono); font-size:8.5px; font-weight:600; letter-spacing:.1em; text-transform:uppercase;
+    color:#fff; background:var(--catc,var(--ink-faint)); padding:3px 8px; border-radius:20px;
+  }
+  .hist .when{font-family:var(--mono); font-size:9.5px; letter-spacing:.03em; color:var(--ink-faint)}
+  .hist .pchip{font-family:var(--mono); font-size:9.5px; letter-spacing:.02em; color:var(--ink-faint); display:inline-flex; align-items:center; gap:3px}
+  .hist .pwhere{font-family:var(--text); font-size:12px; font-style:italic; color:var(--ink-faint); flex:1 1 100%}
+
+  .hist .empty{
+    text-align:center; padding:46px 20px; color:var(--ink-faint); font-style:normal;
+    font-family:var(--text); font-size:14.5px; line-height:1.6;
+  }
+  .hist .empty svg{display:block; margin:0 auto 14px; width:40px; height:40px; stroke:var(--line); fill:none; stroke-width:1.4}
+
+  /* sermon meta as a card */
+  .sermon-meta{
+    margin-top:22px; padding:16px 15px; border:1px solid var(--line-soft); border-top:1px solid var(--line-soft);
+    border-radius:14px; background:var(--surface); box-shadow:var(--shadow);
+  }
+  .sermon-meta .mrow{margin-top:16px}
+  .sermon-meta .mrow:first-child{margin-top:0}
+
+  /* add-naskah form */
+  .addform .editor{min-height:40vh; border-color:var(--line); box-shadow:none}
+  .addform .editor:focus{border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft)}
+
+  /* misc cleanup for app shell */
+  .composer{padding:0; border-bottom:none}
+  #adv{background:var(--surface); border:1px solid var(--line-soft); border-radius:14px; padding:14px; margin-bottom:14px}
+  #adv .field:first-child{margin-top:0}
+  #adv[hidden]{display:none}
+  .foot{display:none}
+  .analysis h2{border-top-color:var(--line-soft)}
+  .intro{padding:0}
+  .intro code{font-family:var(--mono); font-size:.85em; background:var(--surface); padding:1px 5px; border-radius:4px; border:1px solid var(--line-soft)}
+  .thinking{padding:24px 2px 12px}
+  .reftitle{font-family:var(--serif); font-size:15px; font-variant:small-caps; letter-spacing:.04em; color:var(--rubric); margin:0 0 12px}
+  .metatext{width:100%; margin-top:8px; font-family:var(--serif); font-size:16px; color:var(--ink); background:var(--raised); border:1px solid var(--line); border-radius:9px; padding:11px 13px}
+  .metatext:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft)}
+  .sermon-meta .preach-add input{background:var(--raised)}
+  .sermon-meta .sel{background:var(--raised)}
+
+  @media (min-width:560px){
+    .tabbar button{max-width:12rem}
+  }
+</style>
+
+</head>
+<body>
+
+<div class="wrap">
+  <header class="appbar">
+    <div class="brand"><h1>Susun Khotbah</h1></div>
+    <div class="appstatus" id="syncNote" aria-live="polite"></div>
+  </header>
+
+  <section id="view-compose" class="view">
+    <div class="a2hs" id="a2hs" hidden>
+      <span>Pasang seperti aplikasi &mdash; buka halaman ini di HP, ketuk <b>Bagikan</b>, lalu <b>Add to Home Screen</b>.</span>
+      <button type="button" id="a2hsX" aria-label="Tutup">&times;</button>
+    </div>
+
+  <div class="composer" id="composer">
+  <div class="card">
+    <div class="field">
+      <label class="eyebrow" for="ref">Teks utama</label>
+      <textarea id="ref" rows="1" spellcheck="false" autocapitalize="words"
+        placeholder="mis. Yohanes 15:1&ndash;8 &nbsp;&middot;&nbsp; Filipi 2:1&ndash;11 &nbsp;&middot;&nbsp; Lukas 15:11&ndash;32"></textarea>
+    </div>
+    <div class="field">
+      <label class="eyebrow" for="topic">Tema / topik &nbsp;<span class="opt">opsional</span></label>
+      <input id="topic" type="text" spellcheck="false"
+        placeholder="mis. Pemuridan &nbsp;&middot;&nbsp; Sikap dalam melayani &nbsp;&middot;&nbsp; Berbuah">
+    </div>
+    <div class="field">
+      <label class="eyebrow" for="cat">Kategori khotbah</label>
+      <select id="cat" class="sel"></select>
+    </div>
+    <div class="field">
+      <label class="eyebrow">Bahasa naskah</label>
+      <div class="seg" id="langSeg" role="group" aria-label="Bahasa naskah">
+        <button type="button" data-lang="id" aria-pressed="true">Indonesia</button>
+        <button type="button" data-lang="en" aria-pressed="false">English</button>
+      </div>
+      <div class="help" id="langHelp">Bahan berbahasa Inggris akan diterjemahkan dulu, lalu naskah ditulis penuh dalam Bahasa Indonesia.</div>
+    </div>
+  </div>
+
+    <div class="card points-box">
+      <div class="field">
+        <label class="eyebrow" for="points">Poin prinsip / interpretasi yang sudah kamu punya &nbsp;<span class="opt">opsional</span></label>
+        <textarea id="points" rows="3"
+          placeholder="Tempel poin-poinmu di sini, satu per baris. Claude akan carikan kisah &amp; ayat Alkitab yang cocok konteksnya, lalu susun jadi khotbah utuh."></textarea>
+      </div>
+      <div class="upload" id="uploadWrap" hidden>
+        <button type="button" class="up-btn" id="upBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/></svg>
+          Unggah gambar / screenshot poin
+        </button>
+        <input id="imgIn" type="file" accept="image/*" multiple>
+        <div class="up-note" id="upNote" hidden>Gambar mungkin belum didukung di akun/tampilan Claude ini. Kalau gagal saat "Susun", ketik poinnya di kolom atas.</div>
+        <div class="thumbs" id="thumbs"></div>
+      </div>
+    </div>
+
+    <button class="advToggle" id="advToggle" aria-expanded="false">+ Kesempatan &amp; revisi naskah lama</button>
+    <div id="adv" hidden>
+      <div class="field">
+        <label class="eyebrow" for="occ">Kesempatan / ibadah &nbsp;<span class="opt">opsional</span></label>
+        <input id="occ" type="text" spellcheck="false"
+          placeholder="mis. Ibadah Raya Minggu &nbsp;&middot;&nbsp; Ibadah Komunitas Sel &nbsp;&middot;&nbsp; KKR">
+      </div>
+      <div class="field">
+        <label class="eyebrow" for="old">Naskah lama untuk direvisi &nbsp;<span class="opt">opsional</span></label>
+        <textarea id="old" rows="3" placeholder="Tempel naskah khotbah lama di sini &mdash; bagian yang sudah kuat akan dipertahankan."></textarea>
+      </div>
+    </div>
+
+    <div class="composer-actions">
+      <div class="btns">
+        <button class="ghost" id="stopBtn" hidden>Hentikan</button>
+        <button class="primary" id="goBtn">Susun khotbah</button>
+      </div>
+      <span class="hint" id="hint">Disusun lewat akun Claude-mu.</span>
+    </div>
+  </div>
+
+    <div id="stage"></div>
+  </section>
+
+  <section id="view-saved" class="view" hidden>
+    <div id="savedStage"></div>
+  </section>
+
+  <nav class="tabbar" id="tabnav" role="tablist" aria-label="Navigasi">
+    <button type="button" role="tab" data-view="compose" aria-selected="true">
+      <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Susun
+    </button>
+    <button type="button" role="tab" data-view="saved" aria-selected="false">
+      <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>Tersimpan
+      <span class="badge" id="savedCount" hidden></span>
+    </button>
+  </nav>
+
+  <footer class="foot" hidden>
+    Riset kata asli &amp; konteks dari pengetahuan Claude &mdash; cerita/ilustrasi hanya yang faktual &amp; dikenal luas.<br>
+    Naskah tersimpan di perangkat ini &mdash; bisa diedit &amp; ditandai. Versi <b>.docx</b> + web search penuh: pakai skill <code>susun-khotbah</code> di Claude Code.
+  </footer>
+</div>
+
+<script>
+/* Susun Khotbah — penyimpanan Supabase + layar sandi (build situs statis) */
+window.__SK_STORE__ = (function(){
+  var SB_URL   = "https://eilsoorniitbjcupzsci.supabase.co";
+  var SB_KEY   = "sb_publishable_plxpWUiTL7VeIqhV1iYIzQ_shu05gdD";
+  var SB_EMAIL = "arsip@susunkhotbah.app";
+  var SB_PW    = "123456";   /* "" = selalu minta sandi di layar */
+  var sb = null, _res, _rej;
+  var ready = new Promise(function(res, rej){ _res = res; _rej = rej; });
+
+  var GD = null;
+  function ov(){
+    if(GD) return GD;
+    var d = document.createElement("div");
+    d.id = "skGate";
+    d.style.cssText = "position:fixed;inset:0;z-index:99999;display:flex;align-items:center;"
+      + "justify-content:center;padding:24px;background:#0E131A;color:#DCE2E8;font-family:ui-monospace,Menlo,monospace";
+    d.innerHTML =
+      '<div style="width:100%;max-width:20rem;text-align:center">'
+      + '<div style="font-family:Georgia,serif;font-size:18px;margin-bottom:3px">Susun Khotbah</div>'
+      + '<div style="font-size:9px;letter-spacing:.08em;text-transform:uppercase;opacity:.55;margin-bottom:20px">Penyimpanan cloud</div>'
+      + '<form id="skF" style="display:none">'
+      +   '<input id="skP" type="password" autocomplete="current-password" placeholder="Kata sandi" '
+      +     'style="width:100%;padding:12px 13px;font-size:15px;font-family:inherit;border:1px solid #2B3540;'
+      +     'border-radius:9px;background:#161D26;color:#DCE2E8;margin-bottom:9px">'
+      +   '<button type="submit" id="skB" style="width:100%;padding:12px;font-size:11px;font-family:inherit;'
+      +     'letter-spacing:.08em;text-transform:uppercase;font-weight:700;border:0;border-radius:9px;'
+      +     'background:#8AA8E6;color:#12171E;cursor:pointer">Masuk</button>'
+      + '</form>'
+      + '<div id="skM" style="font-size:12px;line-height:1.5;color:#9AA6B1;margin-top:12px;'
+      +   'word-break:break-word;white-space:pre-wrap"></div>'
+      + '</div>';
+    (document.body || document.documentElement).appendChild(d);
+    GD = d;
+    d.querySelector("#skF").addEventListener("submit", function(e){
+      e.preventDefault();
+      var pw = d.querySelector("#skP").value; if(!pw) return;
+      say("Masuk…", 0); d.querySelector("#skB").disabled = true;
+      doLogin(pw);
+    });
+    return d;
+  }
+  function say(msg, isErr){
+    var d = ov(); var m = d.querySelector("#skM");
+    m.textContent = msg || "";
+    m.style.color = isErr ? "#DA867F" : "#9AA6B1";
+  }
+  function askPw(msg){
+    var d = ov(); d.querySelector("#skF").style.display = "block";
+    var b = d.querySelector("#skB"); if(b) b.disabled = false;
+    say(msg || "Masukkan kata sandi.", msg ? 1 : 0);
+    try{ d.querySelector("#skP").focus(); }catch(e){}
+  }
+  function doLogin(pw){
+    sb.auth.signInWithPassword({ email: SB_EMAIL, password: pw }).then(function(r){
+      if(r && r.error){ askPw("Login gagal: " + (r.error.message || r.error) + " (email: " + SB_EMAIL + ")"); return; }
+      if(GD && GD.parentNode) GD.parentNode.removeChild(GD);
+      _res(sb);
+    }, function(err){ askPw("Gagal konek Supabase: " + ((err && err.message) || err)); });
+  }
+
+  say("Menghubungkan…", 0);
+  var s = document.createElement("script");
+  s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+  s.onload = function(){
+    try{
+      if(!window.supabase || !window.supabase.createClient){ say("supabase-js tidak termuat.", 1); return; }
+      sb = window.supabase.createClient(SB_URL, SB_KEY, { auth:{ persistSession:true, autoRefreshToken:true } });
+      say("Memeriksa sesi…", 0);
+      sb.auth.getSession().then(function(r){
+        if(r && r.data && r.data.session){ if(GD && GD.parentNode) GD.parentNode.removeChild(GD); _res(sb); return; }
+        if(SB_PW){ say("Masuk otomatis…", 0); doLoginAuto(); }
+        else askPw();
+      }, function(err){ askPw("Gagal cek sesi: " + ((err && err.message) || err)); });
+    }catch(e){ say("Error: " + (e && e.message || e), 1); }
+  };
+  s.onerror = function(){ say("Gagal memuat supabase-js (cek koneksi / pemblokir).", 1); };
+  (document.head || document.documentElement).appendChild(s);
+
+  function doLoginAuto(){
+    sb.auth.signInWithPassword({ email: SB_EMAIL, password: SB_PW }).then(function(r){
+      if(r && r.error){ askPw("Auto-login gagal: " + (r.error.message || r.error) + " (email: " + SB_EMAIL + ", sandi bawaan)"); return; }
+      if(GD && GD.parentNode) GD.parentNode.removeChild(GD);
+      _res(sb);
+    }, function(err){ askPw("Gagal konek Supabase: " + ((err && err.message) || err)); });
+  }
+
+  function rowToItem(r){
+    return {
+      id: r.id, ref: r.ref || "", sub: r.sub || "", text: r.body || "",
+      cat: r.cat || "Umum", lang: r.lang || "id",
+      preached: Array.isArray(r.preached) ? r.preached : [],
+      ts: r.created_at
+    };
+  }
+  function chk(r){ if(r && r.error) throw r.error; return r; }
+
+  return {
+    load: function(){
+      return ready.then(function(c){
+        return c.from("sermons").select("*").order("created_at", { ascending:false }).limit(300);
+      }).then(chk).then(function(r){ return (r.data || []).map(rowToItem); });
+    },
+    add: function(it){
+      return ready.then(function(c){
+        return c.from("sermons").insert({
+          id: it.id, ref: it.ref, sub: it.sub, body: it.text, cat: it.cat,
+          lang: it.lang || "id", preached: it.preached || [], created_at: it.ts
+        });
+      }).then(chk);
+    },
+    update: function(id, patch){
+      var col = {};
+      if("ref" in patch) col.ref = patch.ref;
+      if("sub" in patch) col.sub = patch.sub;
+      if("text" in patch) col.body = patch.text;
+      if("cat" in patch) col.cat = patch.cat;
+      if("lang" in patch) col.lang = patch.lang;
+      if("preached" in patch) col.preached = patch.preached;
+      if(!Object.keys(col).length) return Promise.resolve();
+      return ready.then(function(c){ return c.from("sermons").update(col).eq("id", id); }).then(chk);
+    },
+    remove: function(id){
+      return ready.then(function(c){ return c.from("sermons").delete().eq("id", id); }).then(chk);
+    }
+  };
+})();
+</script>
+<script>
+(function(){
+  "use strict";
+  var $ = function(s){ return document.querySelector(s); };
+  var stage=$("#stage"), refEl=$("#ref"), topicEl=$("#topic"), pointsEl=$("#points"),
+      occEl=$("#occ"), oldEl=$("#old"), catEl=$("#cat"), goBtn=$("#goBtn"), stopBtn=$("#stopBtn"),
+      hint=$("#hint"), advToggle=$("#advToggle"), adv=$("#adv"),
+      imgIn=$("#imgIn"), upBtn=$("#upBtn"), thumbs=$("#thumbs"), langSeg=$("#langSeg"),
+      tabnav=$("#tabnav"), savedStage=$("#savedStage"), savedCount=$("#savedCount");
+
+  var HKEY="susunkhotbah.history.v1";
+  var CATS=["Keluarga","Pemuridan","Keuangan","Kepemimpinan","Pelayanan","Karakter","Penginjilan","Doa & Ibadah","Hari Raya","Umum"];
+  var CATCOL={
+    "Keluarga":"#B5644C","Pemuridan":"#2C468A","Keuangan":"#3E7A5E","Kepemimpinan":"#6A4E9C",
+    "Pelayanan":"#1F7A8C","Karakter":"#9C6B2E","Penginjilan":"#A03D6B","Doa & Ibadah":"#4A6DA7",
+    "Hari Raya":"#8F2F2B","Umum":"#7B8994"
+  };
+  function catColor(c){ return CATCOL[c] || CATCOL["Umum"]; }
+  var sampleFn=null, dlFn=null, ctl=null, currentView="compose", currentRef="", lastOpts=null,
+      currentHistId=null, currentCat="Umum", savedFilter="all";
+  var imgFiles=[], imgLimit=null, lastText="";
+  var lang = (function(){ try{ return localStorage.getItem("susunkhotbah.lang")==="en"?"en":"id"; }catch(e){ return "id"; } })();
+
+  /* ---------- history (cache + pluggable store) ---------- */
+  // In-memory list; render code stays synchronous. Persistence goes through Store
+  // (localStorage by default; a Supabase-backed store is injected as window.__SK_STORE__
+  // in the Netlify build).
+  var histCache = [];
+  function persistLS(){ try{ localStorage.setItem(HKEY, JSON.stringify(histCache.slice(0,120))); }catch(e){} }
+  var LS = {
+    load:function(){
+      try{ var v=JSON.parse(localStorage.getItem(HKEY)||"[]"); return Promise.resolve(Array.isArray(v)?v:[]); }
+      catch(e){ return Promise.resolve([]); }
+    },
+    add:function(){ persistLS(); },
+    update:function(){ persistLS(); },
+    remove:function(){ persistLS(); }
+  };
+  var Store = (window.__SK_STORE__ && typeof window.__SK_STORE__.load === "function") ? window.__SK_STORE__ : LS;
+  var cloud = Store !== LS;
+
+  function storeDo(p){
+    if(!p || typeof p.then !== "function") return;
+    showSync("busy");
+    p.then(function(){ showSync("ok"); }, function(e){ showSync("err"); if(window.console) console.error(e); });
+  }
+  var syncT=null;
+  function showSync(state){
+    var el=$("#syncNote"); if(!el) return;
+    if(syncT){ clearTimeout(syncT); syncT=null; }
+    if(state==="busy"){ el.textContent=cloud?"menyimpan…":""; el.className="appstatus busy"; }
+    else if(state==="ok"){
+      el.textContent=cloud?"tersimpan":""; el.className="appstatus ok";
+      syncT=setTimeout(function(){ el.textContent=cloud?"cloud":""; el.className="appstatus ok"; }, 1500);
+    }
+    else if(state==="idle"){ el.textContent=cloud?"cloud":""; el.className="appstatus ok"; }
+    else{ el.textContent="gagal simpan"; el.className="appstatus err"; }
+  }
+  function normItem(it){
+    return {
+      id: it.id || (Date.now().toString(36)+Math.random().toString(36).slice(2,6)),
+      ref: it.ref||"", sub: it.sub||"", text: it.text||it.body||"",
+      cat: it.cat||"Umum", lang: it.lang||"id",
+      preached: Array.isArray(it.preached)?it.preached:[],
+      ts: it.ts || it.created_at || new Date().toISOString()
+    };
+  }
+
+  function loadHist(){ return histCache; }
+  function getHist(id){ for(var i=0;i<histCache.length;i++){ if(histCache[i].id===id) return { list:histCache, idx:i, item:histCache[i] }; } return null; }
+  function addHist(ref,sub,text,cat){
+    var it = normItem({ ref:ref, sub:sub||"", text:text, cat:cat||"Umum", lang:lang, preached:[], ts:new Date().toISOString() });
+    histCache.unshift(it);
+    refreshHistCount();
+    storeDo(Store.add(it));
+    return it.id;
+  }
+  function delHist(id){
+    histCache = histCache.filter(function(x){ return x.id!==id; });
+    if(currentHistId===id) currentHistId=null;
+    refreshHistCount(); if(currentView==="saved") renderSaved();
+    storeDo(Store.remove(id));
+  }
+  function patchHist(id,patch){
+    var g=getHist(id); if(!g) return;
+    for(var k in patch){ if(patch.hasOwnProperty(k)) g.item[k]=patch[k]; }
+    refreshHistCount();
+    storeDo(Store.update(id,patch));
+  }
+  function loadHistFromStore(){
+    Store.load().then(function(rows){
+      histCache = (rows||[]).map(normItem);
+      refreshHistCount();
+      if(currentView==="saved") renderSaved();
+    }, function(e){ if(window.console) console.error(e); showSync("err"); });
+  }
+  function refreshHistCount(){ var n=histCache.length; savedCount.textContent = n?String(n):""; savedCount.hidden = !n; }
+  function fmtWhen(iso){ var d=new Date(iso); if(isNaN(d)) return ""; var mo=["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"]; return d.getDate()+" "+mo[d.getMonth()]+" "+d.getFullYear(); }
+  function fmtYmd(s){ if(!s) return ""; var p=String(s).split("-"); if(p.length<3) return s; var mo=["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"]; return (+p[2])+" "+mo[(+p[1])-1]+" "+p[0]; }
+
+  /* ---------- markdown ---------- */
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){ return ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" })[c]; }); }
+  function inl(s){
+    return esc(s).replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>")
+      .replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g,"$1<em>$2</em>")
+      .replace(/`([^`]+)`/g,"<code>$1</code>");
+  }
+  function mdToHtml(md){
+    var lines=String(md).replace(/\r/g,"").split("\n"), out=[], para=[], lb=[], qb=[];
+    function fp(){ if(para.length){ out.push("<p>"+inl(para.join(" "))+"</p>"); para=[]; } }
+    function fl(){ if(lb.length){ out.push("<ul>"+lb.map(function(t){return "<li>"+inl(t)+"</li>";}).join("")+"</ul>"); lb=[]; } }
+    function fq(){ if(qb.length){ out.push("<blockquote>"+inl(qb.join(" "))+"</blockquote>"); qb=[]; } }
+    function fa(){ fp(); fl(); fq(); }
+    for(var i=0;i<lines.length;i++){
+      var ln=lines[i].replace(/\s+$/,""), m;
+      if(!ln.trim()){ fa(); continue; }
+      if((m=ln.match(/^(#{1,3})\s+(.+)$/))){
+        fa(); var h=m[1].length, t=m[2].trim(), nm=t.match(/^(\d+)[.)]\s*(.+)$/);
+        if(h===1) out.push("<h1>"+inl(t)+"</h1>");
+        else if(h>=3 && !nm) out.push("<h3>"+inl(t)+"</h3>");
+        else if(nm) out.push('<h2><span class="n">'+nm[1]+'</span><span>'+inl(nm[2])+"</span></h2>");
+        else out.push("<h2><span>"+inl(t)+"</span></h2>");
+        continue;
+      }
+      if((m=ln.match(/^>\s?(.*)$/))){ fp(); fl(); qb.push(m[1]); continue; }
+      if((m=ln.match(/^[-*•]\s+(.+)$/))){ fp(); fq(); lb.push(m[1]); continue; }
+      if((m=ln.match(/^\d+[.)]\s+(.+)$/))){ fp(); fq(); lb.push(m[1]); continue; }
+      fl(); fq(); para.push(ln.trim());
+    }
+    fa();
+    return out.join("\n");
+  }
+
+  /* ---------- block parser (for exports) ---------- */
+  function runs(s){
+    var parts=[], re=/(\*\*[^*]+\*\*|\*[^*\n]+\*|`[^`]+`)/g, last=0, m;
+    while((m=re.exec(s))){
+      if(m.index>last) parts.push({ text:s.slice(last,m.index) });
+      var tk=m[0];
+      if(tk.slice(0,2)==="**") parts.push({ text:tk.slice(2,-2), bold:true });
+      else if(tk[0]==="`") parts.push({ text:tk.slice(1,-1), code:true });
+      else parts.push({ text:tk.slice(1,-1), italic:true });
+      last=re.lastIndex;
+    }
+    if(last<s.length) parts.push({ text:s.slice(last) });
+    return parts.length?parts:[{ text:s }];
+  }
+  function parseBlocks(md){
+    var lines=String(md).replace(/\r/g,"").split("\n"), bl=[], para=[];
+    function fp(){ if(para.length){ bl.push({ type:"p", runs:runs(para.join(" ")) }); para=[]; } }
+    for(var i=0;i<lines.length;i++){
+      var ln=lines[i].replace(/\s+$/,""), m;
+      if(!ln.trim()){ fp(); continue; }
+      if((m=ln.match(/^(#{1,3})\s+(.+)$/))){
+        fp(); var h=m[1].length, t=m[2].trim(), nm=t.match(/^(\d+)[.)]\s*(.+)$/);
+        if(h===1) bl.push({ type:"title", runs:runs(t) });
+        else if(h>=3 && !nm) bl.push({ type:"h3", runs:runs(t) });
+        else if(nm) bl.push({ type:"h2", num:nm[1], runs:runs(nm[2]) });
+        else bl.push({ type:"h2", runs:runs(t) });
+        continue;
+      }
+      if((m=ln.match(/^>\s?(.*)$/))){ fp(); bl.push({ type:"quote", runs:runs(m[1]) }); continue; }
+      if((m=ln.match(/^[-*•]\s+(.+)$/))){ fp(); bl.push({ type:"li", runs:runs(m[1]) }); continue; }
+      if((m=ln.match(/^(\d+)[.)]\s+(.+)$/))){ fp(); bl.push({ type:"li", runs:runs(m[2]) }); continue; }
+      para.push(ln.trim());
+    }
+    fp();
+    return bl;
+  }
+  function plainTitle(md){
+    var m=String(md).match(/^\s*#\s+(.+)$/m);
+    return (m ? m[1] : (currentRef||"Khotbah")).replace(/[\\/:*?"<>|]+/g," ").trim().slice(0,80);
+  }
+
+  function loadScript(src){
+    return new Promise(function(res,rej){
+      var s=document.createElement("script"); s.src=src; s.async=true;
+      s.onload=function(){ res(); }; s.onerror=function(){ rej(new Error("gagal memuat")); };
+      document.head.appendChild(s);
+    });
+  }
+
+  /* ---------- .docx ---------- */
+  var docxLoad=null;
+  async function makeDocx(md){
+    if(!docxLoad) docxLoad=loadScript("https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js");
+    await docxLoad;
+    var D=window.docx;
+    function mk(rr, forceI){
+      return rr.map(function(r){
+        return new D.TextRun({ text:r.text, bold:!!r.bold, italics:!!(r.italic||forceI), font:r.code?"Consolas":undefined });
+      });
+    }
+    var kids=parseBlocks(md).map(function(b){
+      if(b.type==="title") return new D.Paragraph({ children:mk(b.runs), heading:D.HeadingLevel.TITLE, spacing:{ after:240 } });
+      if(b.type==="h2") return new D.Paragraph({ children:[new D.TextRun({ text:(b.num?b.num+".  ":""), bold:true })].concat(mk(b.runs)), heading:D.HeadingLevel.HEADING_1, spacing:{ before:300, after:120 } });
+      if(b.type==="h3") return new D.Paragraph({ children:mk(b.runs), heading:D.HeadingLevel.HEADING_2, spacing:{ before:180, after:80 } });
+      if(b.type==="li") return new D.Paragraph({ children:mk(b.runs), bullet:{ level:0 }, spacing:{ after:60 } });
+      if(b.type==="quote") return new D.Paragraph({ children:mk(b.runs,true), indent:{ left:540 }, spacing:{ after:140 } });
+      return new D.Paragraph({ children:mk(b.runs), spacing:{ after:130 } });
+    });
+    var doc=new D.Document({ sections:[{ children:kids }] });
+    return await D.Packer.toBlob(doc);
+  }
+
+  /* ---------- .pdf ---------- */
+  var pdfLoad=null;
+  async function makePdf(md){
+    if(!pdfLoad) pdfLoad=loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
+    await pdfLoad;
+    var JS=window.jspdf.jsPDF;
+    var doc=new JS({ unit:"mm", format:"a4" });
+    var M=20, W=170, y=M, PH=277;
+    function room(h){ if(y+h>PH){ doc.addPage(); y=M; } }
+    function block(text, font, style, size, opt){
+      opt=opt||{};
+      doc.setFont(font, style); doc.setFontSize(size);
+      if(opt.color) doc.setTextColor(opt.color[0],opt.color[1],opt.color[2]); else doc.setTextColor(20,25,32);
+      var x=M+(opt.indent||0), maxw=W-(opt.indent||0)-(opt.bulletPad||0);
+      var lines=doc.splitTextToSize(text, maxw), lh=size*0.42+1.1;
+      for(var i=0;i<lines.length;i++){
+        room(lh);
+        if(opt.bullet && i===0){ doc.text("•", M+(opt.indent||0), y); }
+        doc.text(lines[i], x+(opt.bulletPad||0), y);
+        y+=lh;
+      }
+      y+=(opt.gap!=null?opt.gap:2.2);
+    }
+    parseBlocks(md).forEach(function(b){
+      var t=b.runs.map(function(r){ return r.text; }).join("");
+      if(b.type==="title"){ y+=1; block(t,"times","bold",18,{ gap:4 }); }
+      else if(b.type==="h2"){ y+=3.5; block((b.num?b.num+".  ":"")+t,"times","bold",13.5,{ gap:2.6, color:[32,53,107] }); }
+      else if(b.type==="h3"){ y+=1.5; block(t.toUpperCase(),"helvetica","bold",9,{ gap:1.6, color:[110,120,130] }); }
+      else if(b.type==="li"){ block(t,"times","normal",10.5,{ bullet:true, indent:3, bulletPad:4, gap:1.4 }); }
+      else if(b.type==="quote"){ block(t,"times","italic",10.5,{ indent:6, gap:2.4, color:[60,70,80] }); }
+      else block(t,"times","normal",10.5,{ gap:2.4 });
+    });
+    return doc.output("blob");
+  }
+
+  function dlNote(msg){
+    var a=document.querySelector(".analysis"); if(!a) return;
+    var n=document.getElementById("dlNote");
+    if(!n){ n=document.createElement("div"); n.id="dlNote"; n.className="trunc"; a.appendChild(n); }
+    n.textContent=msg;
+  }
+  async function download(kind, btn){
+    if(!lastText) return;
+    var orig=btn.textContent; btn.disabled=true; btn.textContent="…";
+    try{
+      if(!dlFn && window.claude && window.claude.use){
+        try{ dlFn = await window.claude.use("downloads"); }catch(e){}
+      }
+      if(!dlFn){
+        if(window.claude){
+          dlNote("Unduh file belum aktif di tampilan ini. Tutup lalu buka lagi halaman ini di claude.ai (izin unduh diberikan saat halaman dibuka). Sementara: pakai tombol Salin lalu tempel ke Word.");
+          btn.textContent=orig; btn.disabled=false; return;
+        }
+        // situs biasa (mis. Netlify) — unduh langsung lewat browser
+        var nb = kind==="pdf" ? await makePdf(lastText) : await makeDocx(lastText);
+        var nn = plainTitle(lastText) + (kind==="pdf"?".pdf":".docx");
+        var nu = URL.createObjectURL(nb);
+        var na = document.createElement("a");
+        na.href=nu; na.download=nn; document.body.appendChild(na); na.click();
+        setTimeout(function(){ URL.revokeObjectURL(nu); na.remove(); }, 4000);
+        btn.textContent="Terunduh";
+        setTimeout(function(){ btn.textContent=orig; btn.disabled=false; }, 2200);
+        return;
+      }
+      var blob = kind==="pdf" ? await makePdf(lastText) : await makeDocx(lastText);
+      var name = plainTitle(lastText) + (kind==="pdf"?".pdf":".docx");
+      await dlFn.save({ filename:name, data:blob });
+      btn.textContent="Tersimpan";
+    }catch(e){
+      var c=(e&&e.code)||"";
+      if(c==="declined"){ btn.textContent=orig; }
+      else if(c==="too_large"){ btn.textContent="Terlalu besar"; }
+      else if(c==="rejected_extension" || c==="extension_not_enabled"){ btn.textContent="Ditolak"; dlNote("Format "+(kind==="pdf"?"PDF":".docx")+" tidak diizinkan di tampilan ini."); }
+      else{ btn.textContent="Gagal memuat"; dlNote("Gagal menyiapkan file — coba lagi, atau pakai Salin lalu tempel ke Word."); console.error(e); }
+    }
+    setTimeout(function(){ btn.textContent=orig; btn.disabled=false; }, 2200);
+  }
+
+  /* ---------- prompt ---------- */
+  function buildPrompt(o){
+    var hasPts = (o.points && o.points.trim()) || o.imgCount;
+    var en = o.lang === "en";
+    var H = en
+      ? ["## 1. Introduction","## 2. Observation","## 3. Interpretation","## 4. Application (Take Actions)"]
+      : ["## 1. Pendahuluan","## 2. Observasi","## 3. Interpretasi","## 4. Aplikasi (Take Actions)"];
+    var LANGLINE = en
+      ? "Write the ENTIRE sermon in ENGLISH. If any pasted points, passage, or old draft is in another language, translate its meaning into English FIRST, then compose everything in English (do not mix languages). Put the sermon TITLE on the first line (prefixed '# '). Then this REQUIRED structure, in order, each section prefixed '## ' and numbered:"
+      : "Tulis SELURUH naskah dalam BAHASA INDONESIA. Jika ada poin / teks / naskah lama yang ditempel berbahasa Inggris (atau bahasa lain), terjemahkan maknanya ke Bahasa Indonesia DULU, lalu susun semuanya dalam Bahasa Indonesia (jangan campur bahasa). Beri JUDUL khotbah di baris paling atas (diawali '# '). Lalu struktur WAJIB berikut, urutannya tetap, tiap bagian diawali '## ' dan bernomor:";
+    var GREET = en
+      ? "- Open warmly with \"Good morning\" and greetings from the Church JB3 leadership team."
+      : "- Buka dengan 'Selamat pagi' dan salam dari tim kepemimpinan Gereja JB3.";
+    var QUOTE = en
+      ? "- Quote the main passage as a blockquote from the ESV (mention NASB/KJV where word comparison helps)."
+      : "- Kutip ayat/perikop teks utama sebagai blockquote (TB LAI; sebut ESV/NASB bila membantu perbandingan kata).";
+    var RANAH = en
+      ? "- Spread the applications across FOUR spheres: personal, family, business/work, and ministry. The whole sermon must touch all four (go deeper in one sphere where a point is most relevant)."
+      : "- Sebar aplikasinya ke empat ranah: pribadi, keluarga, bisnis/pekerjaan, dan pelayanan. Seluruh naskah harus menyentuh keempat ranah (boleh lebih dalam di satu ranah bila poin itu paling relevan di situ).";
+    var CLOSE = en
+      ? "- Close with a clear, specific call to action — not vague platitudes (\"be better\")."
+      : "- Tutup dengan ajakan bertindak yang jelas & spesifik — bukan basa-basi umum ('jadilah lebih baik').";
+    var RESEARCH = en
+      ? "- Include one research finding genuinely relevant to the sermon's main principle, from a trustworthy body (e.g. Pew Research Center, Bilangan Research Center, Barna Group, Lifeway Research, a national statistics agency, or a recognised university/journal). Name the institution. ONLY cite a finding you are confident is real and roughly accurate — do NOT invent figures, percentages, years, or study titles. If unsure of the exact numbers, state the finding qualitatively ('research by ... points to a trend of ...') or omit this element; never force it."
+      : "- Sisipkan satu temuan penelitian yang benar-benar berkaitan dengan prinsip utama khotbah, dari lembaga tepercaya (mis. Pew Research Center, Bilangan Research Center, Barna Group, Lifeway Research, Badan Pusat Statistik, atau universitas/jurnal yang diakui). Sebut nama lembaganya. HANYA kutip temuan yang kamu YAKIN nyata dan kira-kira akurat — JANGAN mengarang angka, persentase, tahun, atau judul studi. Bila tidak yakin angka pastinya, sampaikan temuannya secara kualitatif ('penelitian ... menunjukkan kecenderungan ...') atau lewati unsur ini; jangan dipaksakan.";
+    var TAIL = en
+      ? "Concise, warm, ready to preach from the pulpit. No filler."
+      : "Padat, hangat, siap dibawakan dari mimbar. Hindari basa-basi.";
+    var L=[
+"Kamu menyusun NASKAH KHOTBAH lengkap gaya Gereja JB3 dari sebuah ayat/perikop Alkitab.",
+"",
+"TEKS UTAMA: " + (o.ref || "(tentukan dari gambar / poin terlampir)"),
+"TEMA / TOPIK: " + (o.topic ? o.topic : "(tentukan dari isi)"),
+"KATEGORI KHOTBAH: " + (o.cat || "Umum") + " — beri warna aplikasi & ilustrasi yang relevan dengan kategori ini, tanpa mengabaikan ranah lain.",
+"KESEMPATAN: " + (o.occ ? o.occ : "Ibadah Raya Gereja JB3")
+    ];
+    if(o.imgCount && !o.ref){
+      L.push("",
+"SEMUA BAHAN (perikop / teks utama, tema, dan poin-poin prinsip) ADA DI " + o.imgCount + " GAMBAR TERLAMPIR. Baca semua gambar dengan teliti. Tentukan teks utama & tema dari isinya; bila ada beberapa kemungkinan perikop, pilih yang paling masuk akal dan sebutkan asumsimu di kalimat pertama. Bila gambar sama sekali tak terbaca, katakan dan minta pengguna mengetik ulang — jangan mengarang.");
+    }
+    if(hasPts){
+      L.push("",
+"POIN PRINSIP / INTERPRETASI DARI PENGGUNA (WAJIB DIPAKAI sebagai poin bagian 3 Interpretasi — jangan ganti, jangan tambah poin utama baru):");
+      if(o.points && o.points.trim()) L.push(o.points.trim());
+      if(o.imgCount && o.ref) L.push("(Poin tambahan ada di " + o.imgCount + " gambar/screenshot terlampir — baca, ekstrak teksnya, gabungkan dengan poin di atas. Jika gambar tak terbaca, katakan.)");
+      L.push(
+"Untuk TIAP poin pengguna: (a) rumuskan satu kalimat tagline yang mudah diingat bila belum ada; (b) carikan satu KISAH ALKITAB lain yang secara KONTEKS benar-benar cocok meneguhkan poin itu (idealnya dari kitab berbeda dari teks utama) beserta ayat-ayat pendukungnya — jelaskan hubungannya, bukan sekadar sebut referensi; (c) hubungkan kembali ke teks utama.");
+    }
+    if(o.old && o.old.trim()){
+      L.push("", "NASKAH LAMA UNTUK DIREVISI (baca utuh dulu; pertahankan bagian yang sudah kuat, perbaiki yang lemah, jangan buang isi penting):", o.old.trim());
+    }
+    L.push(
+"",
+"Riset & sumber:",
+"- Observasi: makna kata asli (Ibrani/Yunani), konteks sejarah & budaya zaman itu — dari pengetahuanmu tentang leksikon & komentari yang mapan. Bila sebuah tafsir diperdebatkan di kalangan ahli, sebutkan; jangan sajikan seolah pasti.",
+"- Ilustrasi / kisah tokoh / perusahaan / peristiwa & data penelitian: HANYA yang kamu yakin faktual & dikenal luas. JANGAN mengarang statistik, persentase, kutipan, tanggal, judul studi, atau detail. Bila tak ada kisah / temuan nyata yang benar-benar cocok & terverifikasi, pakai metafora/analogi umum (dan sebut itu ilustrasi), atau lewati — jangan memaksakan angka.",
+(hasPts ? "" : "- Interpretasi: tarik 3–5 poin/prinsip dari observasi. Tiap poin diteguhkan satu kisah Alkitab lain yang benar-benar relevan (idealnya dari kitab berbeda) — jelaskan hubungannya."),
+"",
+LANGLINE,
+"",
+H[0],
+GREET,
+"- Satu cerita nyata / filosofi / kisah trending-viral / autobiografi tokoh atau perusahaan sukses yang terkoneksi jelas ke poin utama khotbah — menjembatani ke topik, bukan sekadar tempelan.",
+RESEARCH,
+"- Tutup dengan menyebut teks utama dan ketegangan/pertanyaan yang akan dijawab khotbah.",
+"",
+H[1],
+QUOTE,
+"- Bedah 2–4 kata kunci: kata asli (Ibrani/Yunani) + transliterasi, makna harfiah, konteks emosional/teologis.",
+"- Konteks budaya & kejadian pada zaman itu (Timur Dekat kuno / Yahudi abad 1 / Yunani-Romawi) yang menerangi teks.",
+"- Tandai eksplisit bila ada bagian yang secara tekstual diperdebatkan.",
+"",
+H[2],
+(hasPts
+  ? "- Gunakan poin-poin prinsip dari pengguna di atas sebagai poin-poin di bagian ini, berurutan. Untuk tiap poin: tagline + penjelasan + kisah Alkitab lain yang cocok + ayat pendukung + kaitan ke teks utama."
+  : "- Tarik 3–5 poin/prinsip dari observasi. Tiap poin: satu tagline yang mudah diingat, penjelasan, lalu satu kisah Alkitab lain (kitab berbeda) yang meneguhkan — jelaskan hubungannya."),
+"- Bila teks utama punya kelanjutan cerita yang penting untuk pesan penuh (akhir tragis / pemulihan), sertakan — jangan dipotong.",
+"",
+H[3],
+"- Untuk tiap poin Interpretasi, turunkan langkah aplikasi konkret.",
+RANAH,
+CLOSE,
+"",
+TAIL
+    );
+    return L.join("\n").replace(/\n{3,}/g,"\n\n").trim();
+  }
+
+  /* ---------- run ---------- */
+  function setBusy(on){ goBtn.disabled=on; stopBtn.hidden=!on; refEl.readOnly=on; }
+  function showThinking(){
+    stage.innerHTML =
+      '<div class="rbar"><span class="ref">'+esc(currentRef)+'</span></div>' +
+      '<div class="thinking"><span class="dot"></span>Menyusun… bisa 1&ndash;3 menit</div>' +
+      '<article class="analysis" id="analysis"></article>';
+  }
+  function sermonMetaHtml(){
+    return '<section class="sermon-meta fade" id="sermonMeta">' +
+      '<div class="mrow"><label class="eyebrow" for="mRef">Judul / tema</label>' +
+        '<input id="mRef" type="text" class="metatext" spellcheck="false" value="'+esc(currentRef)+'"></div>' +
+      '<div class="mrow"><label class="eyebrow" for="mCat">Kategori</label>' +
+        '<select id="mCat" class="sel">' + CATS.map(function(c){ return '<option'+(c===currentCat?' selected':'')+'>'+esc(c)+'</option>'; }).join("") + '</select></div>' +
+      '<div class="mrow"><label class="eyebrow">Sudah dikhotbahkan di</label>' +
+        '<ul class="preached-list" id="preachedList"></ul>' +
+        '<div class="preach-add">' +
+          '<input id="pPlace" type="text" spellcheck="false" placeholder="Nama gereja / tempat">' +
+          '<input id="pDate" type="date">' +
+          '<button type="button" class="ghost" id="pAdd">Tandai</button>' +
+        '</div></div>' +
+    '</section>';
+  }
+  function renderPreached(){
+    var ul=$("#preachedList"); if(!ul) return;
+    var g = currentHistId ? getHist(currentHistId) : null;
+    var arr = (g && g.item.preached) || [];
+    ul.innerHTML = arr.length
+      ? arr.map(function(p,i){ return '<li>'+esc(p.place||"(tempat?)")+(p.date?' <span>&middot; '+esc(fmtYmd(p.date))+'</span>':"")+' <button type="button" data-pr="'+i+'" aria-label="Hapus">&times;</button></li>'; }).join("")
+      : '<li class="none">Belum ditandai.</li>';
+    ul.querySelectorAll("[data-pr]").forEach(function(b){
+      b.onclick=function(){
+        var gg=getHist(currentHistId); if(!gg) return;
+        var arr2=(gg.item.preached||[]).slice(); arr2.splice(+b.dataset.pr,1);
+        patchHist(currentHistId,{ preached:arr2 });
+        renderPreached(); if(currentView==="saved") renderSaved();
+      };
+    });
+  }
+  function wireMeta(){
+    renderPreached();
+    var mr=$("#mRef");
+    if(mr){
+      var commit=function(){
+        var v=(mr.value||"").trim();
+        if(!v || v===currentRef) { mr.value=currentRef; return; }
+        currentRef=v;
+        if(currentHistId) patchHist(currentHistId,{ ref:v });
+        var rt=document.querySelector(".reftitle"); if(rt) rt.textContent=v;
+        if(currentView==="saved") renderSaved();
+      };
+      mr.addEventListener("change", commit);
+      mr.addEventListener("keydown", function(e){ if(e.key==="Enter"){ e.preventDefault(); mr.blur(); } });
+    }
+    var mc=$("#mCat");
+    if(mc) mc.onchange=function(){
+      currentCat=mc.value;
+      if(currentHistId) patchHist(currentHistId,{ cat:mc.value });
+      if(currentView==="saved") renderSaved();
+    };
+    var pa=$("#pAdd");
+    if(pa) pa.onclick=function(){
+      var place=($("#pPlace").value||"").trim();
+      if(!place){ $("#pPlace").focus(); return; }
+      var g=currentHistId?getHist(currentHistId):null; if(!g) return;
+      var arr2=(g.item.preached||[]).slice();
+      arr2.push({ place:place, date:$("#pDate").value||"" });
+      patchHist(currentHistId,{ preached:arr2 });
+      $("#pPlace").value=""; $("#pDate").value="";
+      renderPreached(); if(currentView==="saved") renderSaved();
+    };
+  }
+  function enterEdit(){
+    var art=$("#analysis"); if(!art) return;
+    var m=$("#sermonMeta"); if(m) m.hidden=true;
+    art.innerHTML='<textarea class="editor" id="edArea" spellcheck="true"></textarea>';
+    var ta=$("#edArea"); ta.value=lastText; ta.focus();
+    autoGrow(ta,6000);
+    ta.addEventListener("input", function(){ autoGrow(ta,6000); });
+    var acts=document.querySelector(".rbar .acts");
+    if(acts) acts.innerHTML='<button class="ghost" id="edSave">Simpan</button><button class="ghost" id="edCancel">Batal</button>';
+    var sv=$("#edSave"), cn=$("#edCancel");
+    if(sv) sv.onclick=function(){
+      lastText=ta.value;
+      if(currentHistId) patchHist(currentHistId,{ text:lastText });
+      renderResult(lastText,{ done:true });
+    };
+    if(cn) cn.onclick=function(){ renderResult(lastText,{ done:true }); };
+  }
+  var BACK_BTN='<button type="button" class="back" id="backBtn"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Kembali</button>';
+  function renderResult(text, opts){
+    opts=opts||{};
+    lastText = text;
+    if(opts.done) setComposerVisible(false);
+    var acts = opts.done ? '<span class="acts">' +
+        '<button class="ghost" id="edBtn">Edit</button>' +
+        '<button class="ghost" id="reBtn">Susun ulang</button>' +
+        '<button class="ghost" id="cpBtn">Salin</button>' +
+        '<button class="ghost" id="dxBtn">.docx</button><button class="ghost" id="pdfBtn">PDF</button>' +
+      '</span>' : "";
+    stage.innerHTML =
+      '<div class="rbar">'+(opts.done?BACK_BTN:'<span class="ref">'+esc(currentRef)+'</span>')+acts+'</div>' +
+      (opts.done?'<p class="reftitle">'+esc(currentRef)+'</p>':'') +
+      '<article class="analysis fade" id="analysis">'+mdToHtml(text) +
+        (opts.truncated ? '<div class="trunc">— Naskah terpotong. Coba pecah jadi lebih sedikit poin.</div>' : "") +
+      '</article>' +
+      ((opts.done && currentHistId) ? sermonMetaHtml() : "");
+    if(opts.done){
+      var bk=$("#backBtn");
+      if(bk) bk.onclick=function(){ currentHistId=null; lastOpts=null; renderIntro(); scrollTop(); };
+      var ed=$("#edBtn"), re=$("#reBtn"), cp=$("#cpBtn"), dx=$("#dxBtn"), pf=$("#pdfBtn");
+      if(ed) ed.onclick=function(){ enterEdit(); };
+      if(re) re.onclick=function(){ startRun(true); };
+      if(cp) cp.onclick=function(){
+        (navigator.clipboard&&navigator.clipboard.writeText ? navigator.clipboard.writeText(currentRef+"\n\n"+lastText) : Promise.reject())
+          .then(function(){ cp.textContent="Tersalin"; }, function(){ cp.textContent="Gagal salin"; })
+          .then(function(){ setTimeout(function(){ cp.textContent="Salin"; },1600); });
+      };
+      if(dx) dx.onclick=function(){ download("docx", dx); };
+      if(pf) pf.onclick=function(){ download("pdf", pf); };
+      if(currentHistId) wireMeta();
+    }
+  }
+  function errCopy(code){
+    switch(code){
+      case "not_granted": case "sampling_disabled": case "not_declared": case "capability_disabled":
+        return "Penyusunan lewat Claude tidak diizinkan di tampilan ini. Buka halaman ini di claude.ai.";
+      case "rate_limited": return "Terlalu banyak permintaan atau batas pemakaian Claude tercapai. Coba lagi nanti.";
+      case "session_expired": return "Sesi Claude berakhir — masuk lagi lalu ulangi.";
+      case "prompt_too_large": return "Masukan terlalu panjang. Persingkat poin / naskah lama.";
+      case "images_unavailable": return "Kirim gambar belum didukung di akun/tampilan Claude ini — gambarnya sudah dilepas. Ketik teks utama & poinnya di kolom atas, lalu Susun lagi. (Atau coba buka di claude.ai versi web.)";
+      case "image_rejected": return "Gambar ditolak — format tak didukung atau ukuran terlalu besar.";
+      case "refused": return "Claude menolak permintaan ini. Coba rumuskan ulang.";
+      case "empty_completion": return "Tidak ada hasil. Coba lagi atau sederhanakan permintaan.";
+      case "cancelled": return "";
+      default: return "Terjadi gangguan koneksi ke Claude. Coba lagi.";
+    }
+  }
+  function readForm(){
+    var ref=(refEl.value||"").trim();
+    var hasImg=imgFiles.length>0;
+    if(!ref && !hasImg){
+      refEl.focus();
+      hint.textContent = imgLimit ? "Isi teks utama, atau unggah gambar poinnya." : "Isi dulu teks utamanya."; hint.classList.add("warn");
+      setTimeout(function(){ hint.textContent="Disusun lewat akun Claude-mu."; hint.classList.remove("warn"); }, 3200);
+      return null;
+    }
+    return {
+      ref:ref, topic:(topicEl.value||"").trim(), points:(pointsEl.value||"").trim(),
+      occ:(occEl.value||"").trim(), old:(oldEl.value||"").trim(), cat:(catEl.value||"Umum"),
+      imgCount:imgFiles.length, imgs:imgFiles.slice(), lang:lang
+    };
+  }
+  function startRun(force){
+    var o = lastOpts || readForm();
+    if(!o) return;
+    lastOpts=o;
+    if(!sampleFn) return;
+    currentRef = o.ref || o.topic || (o.imgCount ? o.imgCount+" gambar poin" : "Khotbah");
+    currentHistId=null; currentCat=o.cat||"Umum";
+    if(currentView!=="compose"){ currentView="compose"; $("#view-compose").hidden=false; $("#view-saved").hidden=true; setTab("compose"); }
+    setComposerVisible(true);
+    ctl=new AbortController();
+    setBusy(true); showThinking();
+    try{ $("#stage").scrollIntoView({ behavior:"smooth", block:"start" }); }catch(e){}
+    var opt={ modelTier:"complex", cache:force?false:true, signal:ctl.signal,
+      onText:function(u){ var art=$("#analysis"), th=document.querySelector(".thinking"); if(th) th.remove(); if(art) art.innerHTML=mdToHtml(u.text); } };
+    if(o.imgs && o.imgs.length) opt.images=o.imgs;
+    sampleFn(buildPrompt(o), opt).then(function(res){
+      currentHistId = addHist(o.ref || plainTitle(res.text), [o.lang==="en"?"EN":"", o.topic, o.occ, o.points?"+poin":"", o.imgCount?"+"+o.imgCount+" gambar":""].filter(Boolean).join(" · "), res.text, o.cat);
+      currentCat = o.cat || "Umum";
+      renderResult(res.text, { done:true, truncated:res.truncated });
+    }).catch(function(e){
+      if(e && e.code==="cancelled"){
+        if(e.text && e.text.trim()) renderResult(e.text, { done:true }); else renderIntro();
+      }else{
+        if(e && e.code==="images_unavailable"){ $("#upNote").hidden=false; imgFiles=[]; renderThumbs(); lastOpts=null; }
+        var body=(e && e.text && e.text.trim()) ? mdToHtml(e.text) : "";
+        setComposerVisible(false);
+        stage.innerHTML='<div class="rbar">'+BACK_BTN+'</div>' +
+          '<article class="analysis">'+body+'<div class="err">'+esc(errCopy(e && e.code)||"Gagal.")+'</div></article>';
+        var bk2=$("#backBtn"); if(bk2) bk2.onclick=function(){ lastOpts=null; renderIntro(); scrollTop(); };
+      }
+    }).then(function(){ setBusy(false); ctl=null; });
+  }
+
+  /* ---------- views: compose / saved ---------- */
+  function scrollTop(){ try{ window.scrollTo({ top:0, behavior:"instant" }); }catch(e){ window.scrollTo(0,0); } }
+  function setTab(name){
+    Array.prototype.forEach.call(tabnav.querySelectorAll("button"), function(b){
+      b.setAttribute("aria-selected", b.dataset.view===name ? "true":"false");
+    });
+  }
+  function setComposerVisible(v){ var c=$("#composer"); if(c) c.hidden=!v; }
+
+  var BOOKMARK_SVG='<svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
+
+  function renderSaved(){
+    var l=loadHist();
+    var head='<aside class="hist fade">'+
+      '<div class="savedhead"><div><h2>Tersimpan</h2>'+
+        '<p class="sub">'+(cloud?"Tersimpan di cloud &middot; sinkron di semua perangkat":"Tersimpan di perangkat ini")+'</p></div>'+
+        '<button type="button" class="ghost addbtn" id="skAdd">+ Tambah</button></div>';
+    if(!l.length){
+      savedStage.innerHTML=head+'<p class="empty">'+BOOKMARK_SVG+'Belum ada naskah.<br>Susun di tab &ldquo;Susun&rdquo;, atau <b>+ Tambah</b> naskah yang sudah jadi.</p></aside>';
+      wireSavedHead(); return;
+    }
+    var present={};
+    l.forEach(function(it){ present[it.cat||"Umum"]=true; });
+    var chips='<div class="filters" id="savedFilters"><button type="button" data-cat="all" aria-pressed="'+(savedFilter==="all")+'">Semua &middot; '+l.length+'</button>';
+    CATS.forEach(function(c){
+      if(!present[c]) return;
+      var n=l.filter(function(it){ return (it.cat||"Umum")===c; }).length;
+      chips+='<button type="button" data-cat="'+esc(c)+'" aria-pressed="'+(savedFilter===c)+'">'+esc(c)+' &middot; '+n+'</button>';
+    });
+    chips+='</div>';
+    var shown = savedFilter==="all" ? l : l.filter(function(it){ return (it.cat||"Umum")===savedFilter; });
+    var body = shown.length ? "<ul>"+shown.map(function(it){
+      var cat=it.cat||"Umum";
+      var pn=(it.preached&&it.preached.length)||0;
+      var where = pn ? it.preached.map(function(p){ return p.place; }).filter(Boolean).join(", ") : "";
+      return '<li style="--catc:'+catColor(cat)+'">'+
+        '<button class="open" data-id="'+esc(it.id)+'">'+esc(it.ref||"(tanpa judul)")+(it.sub?'<small>'+esc(it.sub)+'</small>':"")+'</button>'+
+        '<button class="del" data-del="'+esc(it.id)+'" aria-label="Hapus">&times;</button>'+
+        '<span class="tags">'+
+          '<span class="cat">'+esc(cat)+'</span>'+
+          '<span class="when">'+esc(fmtWhen(it.ts))+'</span>'+
+          (pn?'<span class="pchip">&#9962; '+pn+'&times;</span>':'')+
+          (where?'<span class="pwhere">'+esc(where)+'</span>':'')+
+        '</span></li>';
+    }).join("")+"</ul>" : '<p class="empty">'+BOOKMARK_SVG+'Belum ada naskah di kategori ini.</p>';
+    savedStage.innerHTML=head+chips+body+"</aside>";
+    wireSavedHead();
+    savedStage.querySelectorAll("#savedFilters button").forEach(function(b){
+      b.onclick=function(){ savedFilter=b.dataset.cat; renderSaved(); };
+    });
+    savedStage.querySelectorAll(".open").forEach(function(b){
+      b.onclick=function(){
+        var it=loadHist().filter(function(x){return x.id===b.dataset.id;})[0]; if(!it) return;
+        currentRef=it.ref; currentHistId=it.id; currentCat=it.cat||"Umum"; lastOpts=null;
+        currentView="compose";
+        $("#view-saved").hidden=true; $("#view-compose").hidden=false; setTab("compose");
+        renderResult(it.text, { done:true });
+        scrollTop();
+      };
+    });
+    savedStage.querySelectorAll(".del").forEach(function(b){ b.onclick=function(){
+      if(!window.confirm("Hapus naskah ini?")) return;
+      delHist(b.dataset.del);
+    }; });
+  }
+  function wireSavedHead(){
+    var a=$("#skAdd"); if(a) a.onclick=renderAddForm;
+  }
+  function renderAddForm(){
+    savedStage.innerHTML=
+      '<aside class="hist addform fade"><h2>Tambah naskah</h2>'+
+      '<p class="sub">Tempel naskah yang sudah jadi (mis. hasil dari claude.ai)</p>'+
+      '<div class="card">'+
+        '<div class="field"><label class="eyebrow" for="aRef">Judul / teks utama</label>'+
+          '<input id="aRef" type="text" spellcheck="false" placeholder="mis. Yohanes 15:1&ndash;8"></div>'+
+        '<div class="field"><label class="eyebrow" for="aCat">Kategori</label>'+
+          '<select id="aCat" class="sel">'+CATS.map(function(c){ return '<option'+(c==="Umum"?" selected":"")+'>'+esc(c)+'</option>'; }).join("")+'</select></div>'+
+        '<div class="field"><label class="eyebrow" for="aBody">Naskah (Markdown)</label>'+
+          '<textarea id="aBody" class="editor" placeholder="# Judul khotbah&#10;&#10;## 1. Pendahuluan&#10;..."></textarea></div>'+
+      '</div>'+
+      '<div class="composer-actions"><div class="btns">'+
+        '<button type="button" class="ghost" id="aCancel">Batal</button>'+
+        '<button type="button" class="primary" id="aSave">Simpan</button>'+
+      '</div></div></aside>';
+    $("#aCancel").onclick=function(){ renderSaved(); };
+    $("#aSave").onclick=function(){
+      var b=($("#aBody").value||"").trim();
+      if(!b){ $("#aBody").focus(); return; }
+      var r=($("#aRef").value||"").trim() || plainTitle(b) || "Naskah";
+      var c=$("#aCat").value||"Umum";
+      var id=addHist(r,"ditempel",b,c);
+      currentRef=r; currentHistId=id; currentCat=c; lastOpts=null;
+      currentView="compose";
+      $("#view-saved").hidden=true; $("#view-compose").hidden=false; setTab("compose");
+      renderResult(b, { done:true });
+      scrollTop();
+    };
+  }
+  function showView(name){
+    currentView = name;
+    $("#view-compose").hidden = (name!=="compose");
+    $("#view-saved").hidden = (name!=="saved");
+    setTab(name);
+    if(name==="compose"){ currentHistId=null; lastOpts=null; setComposerVisible(true); renderIntro(); }
+    else{ renderSaved(); }
+    scrollTop();
+  }
+  function renderIntro(){
+    setComposerVisible(true);
+    stage.innerHTML =
+      '<div class="intro fade"><p>Isi <b>Teks utama</b>. Kalau sudah punya poin prinsip, tempel di kolomnya &mdash; Claude carikan kisah &amp; ayat yang cocok. Naskah keluar empat bagian:</p>' +
+      '<ol class="movements">' +
+      '<li><b>Pendahuluan</b> — sapaan &amp; salam tim JB3, cerita nyata yang menjembatani ke topik + data penelitian</li>' +
+      '<li><b>Observasi</b> — kutipan teks, kata asli Ibrani/Yunani, konteks budaya &amp; zaman itu</li>' +
+      '<li><b>Interpretasi</b> — poinmu (atau 3&ndash;5 poin dari teks), tiap poin diteguhkan kisah Alkitab lain</li>' +
+      '<li><b>Aplikasi</b> — langkah konkret per poin ke empat ranah: pribadi, keluarga, bisnis/pekerjaan, pelayanan</li>' +
+      '</ol>' +
+      '<p class="fineprint">Riset &amp; ilustrasi dari pengetahuan Claude &mdash; hanya yang faktual &amp; dikenal luas. Versi .docx + web search penuh: skill <code>susun-khotbah</code> di Claude Code.</p>' +
+      '</div>';
+  }
+
+  /* ---------- images ---------- */
+  function renderThumbs(){
+    thumbs.innerHTML = imgFiles.map(function(f,i){
+      return '<div class="thumb"><img src="'+URL.createObjectURL(f)+'" alt=""><button data-rm="'+i+'" aria-label="Hapus">×</button></div>';
+    }).join("");
+    thumbs.querySelectorAll("[data-rm]").forEach(function(b){
+      b.onclick=function(){ imgFiles.splice(+b.dataset.rm,1); lastOpts=null; renderThumbs(); };
+    });
+  }
+  upBtn.addEventListener("click", function(){ imgIn.click(); });
+  imgIn.addEventListener("change", function(){
+    var max = (imgLimit && imgLimit.maxCount) || 8;
+    var picked = Array.prototype.slice.call(imgIn.files||[]);
+    for(var i=0;i<picked.length && imgFiles.length<max;i++) imgFiles.push(picked[i]);
+    imgIn.value=""; lastOpts=null; renderThumbs();
+    if(imgFiles.length && !imgLimit) $("#upNote").hidden=false;
+  });
+
+  /* ---------- language ---------- */
+  function applyLang(){
+    langSeg.querySelectorAll("button").forEach(function(b){ b.setAttribute("aria-pressed", b.dataset.lang===lang ? "true":"false"); });
+    $("#langHelp").textContent = lang==="en"
+      ? "Bahan berbahasa Indonesia akan diterjemahkan dulu, lalu naskah ditulis penuh dalam Bahasa Inggris."
+      : "Bahan berbahasa Inggris akan diterjemahkan dulu, lalu naskah ditulis penuh dalam Bahasa Indonesia.";
+  }
+  langSeg.addEventListener("click", function(e){
+    var b=e.target.closest("button"); if(!b) return;
+    lang=b.dataset.lang; lastOpts=null;
+    try{ localStorage.setItem("susunkhotbah.lang", lang); }catch(err){}
+    applyLang();
+  });
+  applyLang();
+
+  /* ---------- wiring ---------- */
+  function autoGrow(el,max){ el.style.height="auto"; el.style.height=Math.min(el.scrollHeight, max||200)+"px"; }
+  refEl.addEventListener("input", function(){ autoGrow(refEl,140); });
+  [pointsEl, oldEl].forEach(function(el){ el.addEventListener("input", function(){ autoGrow(el,300); }); });
+  [refEl, topicEl, occEl].forEach(function(el){
+    el.addEventListener("keydown", function(e){ if((e.metaKey||e.ctrlKey) && e.key==="Enter"){ e.preventDefault(); lastOpts=null; startRun(false); } });
+  });
+  advToggle.addEventListener("click", function(){
+    var open=adv.hidden; adv.hidden=!open;
+    advToggle.setAttribute("aria-expanded", open?"true":"false");
+    advToggle.textContent=(open?"− ":"+ ")+"Kesempatan & revisi naskah lama";
+  });
+  goBtn.addEventListener("click", function(){ lastOpts=null; startRun(false); });
+  stopBtn.addEventListener("click", function(){ if(ctl) ctl.abort(); });
+
+  tabnav.addEventListener("click", function(e){
+    var b=e.target.closest("button"); if(!b || !b.dataset.view) return;
+    showView(b.dataset.view);
+  });
+
+  catEl.innerHTML = CATS.map(function(c){ return '<option'+(c==="Umum"?' selected':'')+'>'+c+'</option>'; }).join("");
+
+  (function(){
+    var a2hs=$("#a2hs"), x=$("#a2hsX");
+    try{ if(localStorage.getItem("susunkhotbah.a2hs")!=="off") a2hs.hidden=false; }catch(e){}
+    x.addEventListener("click", function(){
+      a2hs.hidden=true;
+      try{ localStorage.setItem("susunkhotbah.a2hs","off"); }catch(e){}
+    });
+  })();
+
+  refreshHistCount(); renderIntro(); showView("compose"); autoGrow(refEl,140);
+  showSync("idle");
+  loadHistFromStore();
+
+  goBtn.disabled=true; hint.textContent="Menyiapkan…";
+  (window.claude && window.claude.use ? window.claude.use("sample") : Promise.resolve(null))
+    .then(function(fn){
+      if(fn){
+        sampleFn=fn; goBtn.disabled=false; hint.textContent="Disusun lewat akun Claude-mu.";
+        (fn.limits ? fn.limits() : Promise.reject()).then(function(lim){
+          if(lim && lim.images){
+            imgLimit=lim.images;
+            $("#uploadWrap").hidden=false;
+            if(lim.images.mediaTypes && lim.images.mediaTypes.length) imgIn.accept=lim.images.mediaTypes.join(",");
+          }
+          // kalau images tak didukung: tombol unggah tetap disembunyikan (tidak akan berfungsi)
+        }).catch(function(){});
+      }else{
+        goBtn.disabled=true; hint.textContent="Buka di claude.ai untuk menyusun — Penyimpanan tetap bisa dibuka & diedit."; hint.classList.add("warn");
+      }
+    })
+    .catch(function(){ goBtn.disabled=true; hint.textContent="Penyusunan lewat Claude tidak tersedia di tampilan ini."; hint.classList.add("warn"); });
+
+  (window.claude && window.claude.use ? window.claude.use("downloads") : Promise.resolve(null))
+    .then(function(fn){ dlFn=fn||null; if(dlFn && lastText) renderResult(lastText, { done:true }); })
+    .catch(function(){ dlFn=null; });
+})();
+</script>
+
+</body>
+</html>
