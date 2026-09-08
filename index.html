@@ -828,6 +828,38 @@ window.__SK_STORE__ = (function(){
     });
   }
 
+  /* ---------- .doc (HTML-Word, tanpa library — paling andal) ---------- */
+  function makeDocHtml(md){
+    function esc2(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+    function runsHtml(rr){
+      return rr.map(function(r){
+        var t=esc2(r.text);
+        if(r.code) t="<span style='font-family:Consolas,monospace'>"+t+"</span>";
+        if(r.bold) t="<b>"+t+"</b>";
+        if(r.italic) t="<i>"+t+"</i>";
+        return t;
+      }).join("");
+    }
+    var body=parseBlocks(md).map(function(b){
+      if(b.type==="title") return "<h1>"+runsHtml(b.runs)+"</h1>";
+      if(b.type==="h2") return "<h2>"+(b.num?b.num+".&nbsp;&nbsp;":"")+runsHtml(b.runs)+"</h2>";
+      if(b.type==="h3") return "<h3>"+runsHtml(b.runs)+"</h3>";
+      if(b.type==="li") return "<p style='margin:0 0 4pt 18pt;text-indent:-12pt'>&bull;&nbsp;&nbsp;"+runsHtml(b.runs)+"</p>";
+      if(b.type==="quote") return "<blockquote>"+runsHtml(b.runs)+"</blockquote>";
+      return "<p>"+runsHtml(b.runs)+"</p>";
+    }).join("\n");
+    var title=esc2(plainTitle(md));
+    var html="<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>"+
+      "<head><meta charset='utf-8'><title>"+title+"</title>"+
+      "<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]-->"+
+      "<style>@page{size:A4;margin:2.2cm} body{font-family:'Times New Roman',Georgia,serif;font-size:12pt;line-height:1.5;color:#141920}"+
+      "h1{font-size:19pt;margin:0 0 12pt} h2{font-size:14pt;color:#20356B;margin:16pt 0 6pt}"+
+      "h3{font-size:10pt;letter-spacing:.04em;text-transform:uppercase;color:#6E7882;margin:10pt 0 4pt}"+
+      "p{margin:0 0 7pt} blockquote{margin:0 0 8pt 1cm;font-style:italic;color:#3C4650}</style></head><body>"+
+      body+"</body></html>";
+    return new Blob(["﻿"+html], { type:"application/msword" });
+  }
+
   /* ---------- .docx ---------- */
   var docxLoad=null;
   async function makeDocx(md){
@@ -892,9 +924,51 @@ window.__SK_STORE__ = (function(){
     if(!n){ n=document.createElement("div"); n.id="dlNote"; n.className="trunc"; a.appendChild(n); }
     n.textContent=msg;
   }
+  function copyAll(btn){
+    var full = (currentRef ? currentRef+"\n\n" : "") + (lastText||"");
+    var done = function(ok){
+      btn.textContent = ok ? "Tersalin ✓" : "Tekan lama → Salin";
+      if(!ok){
+        try{
+          var el=$("#analysis"), r=document.createRange(); r.selectNodeContents(el);
+          var s=window.getSelection(); s.removeAllRanges(); s.addRange(r);
+        }catch(e){}
+        dlNote("Salin otomatis diblokir browser — teksnya sudah disorot, tekan lama lalu pilih Salin.");
+      }
+      setTimeout(function(){ btn.textContent="Salin semua"; }, ok?1600:3500);
+    };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(full).then(function(){ done(true); }, function(){ fallbackCopy(full, done); });
+    } else fallbackCopy(full, done);
+  }
+  function fallbackCopy(txt, done){
+    try{
+      var t=document.createElement("textarea");
+      t.value=txt; t.setAttribute("readonly","");
+      t.style.cssText="position:fixed;top:0;left:0;opacity:0";
+      document.body.appendChild(t);
+      t.focus(); t.setSelectionRange(0, txt.length);
+      var ok=document.execCommand && document.execCommand("copy");
+      document.body.removeChild(t);
+      done(!!ok);
+    }catch(e){ done(false); }
+  }
+
+  var EXT={ pdf:".pdf", docx:".docx", doc:".doc" };
+  async function buildFile(kind){
+    if(kind==="pdf") return await makePdf(lastText);
+    if(kind==="doc") return makeDocHtml(lastText);
+    return await makeDocx(lastText);
+  }
+  function saveViaBrowser(blob, name){
+    var u=URL.createObjectURL(blob), a=document.createElement("a");
+    a.href=u; a.download=name; document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(u); a.remove(); }, 4000);
+  }
   async function download(kind, btn){
     if(!lastText) return;
     var orig=btn.textContent; btn.disabled=true; btn.textContent="…";
+    var name = plainTitle(lastText) + (EXT[kind]||".docx");
     try{
       if(!dlFn && window.claude && window.claude.use){
         try{ dlFn = await window.claude.use("downloads"); }catch(e){}
@@ -904,26 +978,21 @@ window.__SK_STORE__ = (function(){
           dlNote("Unduh file belum aktif di tampilan ini. Tutup lalu buka lagi halaman ini di claude.ai (izin unduh diberikan saat halaman dibuka). Sementara: pakai tombol Salin lalu tempel ke Word.");
           btn.textContent=orig; btn.disabled=false; return;
         }
-        // situs biasa (mis. Netlify) — unduh langsung lewat browser
-        var nb = kind==="pdf" ? await makePdf(lastText) : await makeDocx(lastText);
-        var nn = plainTitle(lastText) + (kind==="pdf"?".pdf":".docx");
-        var nu = URL.createObjectURL(nb);
-        var na = document.createElement("a");
-        na.href=nu; na.download=nn; document.body.appendChild(na); na.click();
-        setTimeout(function(){ URL.revokeObjectURL(nu); na.remove(); }, 4000);
+        // situs biasa (Cloudflare/Netlify) — unduh langsung lewat browser
+        saveViaBrowser(await buildFile(kind), name);
         btn.textContent="Terunduh";
         setTimeout(function(){ btn.textContent=orig; btn.disabled=false; }, 2200);
         return;
       }
-      var blob = kind==="pdf" ? await makePdf(lastText) : await makeDocx(lastText);
-      var name = plainTitle(lastText) + (kind==="pdf"?".pdf":".docx");
-      await dlFn.save({ filename:name, data:blob });
+      // claude.ai — lewat kemampuan downloads. .doc diblokir platform → jatuhkan ke .docx.
+      if(kind==="doc"){ kind="docx"; name=plainTitle(lastText)+".docx"; }
+      await dlFn.save({ filename:name, data:await buildFile(kind) });
       btn.textContent="Tersimpan";
     }catch(e){
       var c=(e&&e.code)||"";
       if(c==="declined"){ btn.textContent=orig; }
       else if(c==="too_large"){ btn.textContent="Terlalu besar"; }
-      else if(c==="rejected_extension" || c==="extension_not_enabled"){ btn.textContent="Ditolak"; dlNote("Format "+(kind==="pdf"?"PDF":".docx")+" tidak diizinkan di tampilan ini."); }
+      else if(c==="rejected_extension" || c==="extension_not_enabled"){ btn.textContent="Ditolak"; dlNote("Format "+(EXT[kind]||".docx")+" tidak diizinkan di tampilan ini — coba tombol lain."); }
       else{ btn.textContent="Gagal memuat"; dlNote("Gagal menyiapkan file — coba lagi, atau pakai Salin lalu tempel ke Word."); console.error(e); }
     }
     setTimeout(function(){ btn.textContent=orig; btn.disabled=false; }, 2200);
@@ -1114,7 +1183,8 @@ TAIL
     var acts = opts.done ? '<span class="acts">' +
         '<button class="ghost" id="edBtn">Edit</button>' +
         '<button class="ghost" id="reBtn">Susun ulang</button>' +
-        '<button class="ghost" id="cpBtn">Salin</button>' +
+        '<button class="ghost" id="cpBtn">Salin semua</button>' +
+        '<button class="ghost" id="docBtn">.doc</button>' +
         '<button class="ghost" id="dxBtn">.docx</button><button class="ghost" id="pdfBtn">PDF</button>' +
       '</span>' : "";
     stage.innerHTML =
@@ -1127,14 +1197,11 @@ TAIL
     if(opts.done){
       var bk=$("#backBtn");
       if(bk) bk.onclick=function(){ currentHistId=null; lastOpts=null; renderIntro(); scrollTop(); };
-      var ed=$("#edBtn"), re=$("#reBtn"), cp=$("#cpBtn"), dx=$("#dxBtn"), pf=$("#pdfBtn");
+      var ed=$("#edBtn"), re=$("#reBtn"), cp=$("#cpBtn"), dc=$("#docBtn"), dx=$("#dxBtn"), pf=$("#pdfBtn");
       if(ed) ed.onclick=function(){ enterEdit(); };
       if(re) re.onclick=function(){ startRun(true); };
-      if(cp) cp.onclick=function(){
-        (navigator.clipboard&&navigator.clipboard.writeText ? navigator.clipboard.writeText(currentRef+"\n\n"+lastText) : Promise.reject())
-          .then(function(){ cp.textContent="Tersalin"; }, function(){ cp.textContent="Gagal salin"; })
-          .then(function(){ setTimeout(function(){ cp.textContent="Salin"; },1600); });
-      };
+      if(cp) cp.onclick=function(){ copyAll(cp); };
+      if(dc) dc.onclick=function(){ download("doc", dc); };
       if(dx) dx.onclick=function(){ download("docx", dx); };
       if(pf) pf.onclick=function(){ download("pdf", pf); };
       if(currentHistId) wireMeta();
