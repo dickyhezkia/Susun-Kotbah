@@ -1,0 +1,13 @@
+{
+  // 2026-10-19: dulu "assets only" (dibuat otomatis oleh Cloudflare). Sekarang worker.js
+  // jadi entry-point: request biasa tetap diteruskan ke env.ASSETS (situs tidak berubah),
+  // ditambah cron harian untuk keep-alive Supabase (lihat worker.js).
+  "name": "susun-kotbah",
+  "compatibility_date": "2026-09-08",
+  "main": "worker.js",
+  "triggers": { "crons": ["17 2 * * *"] },   // tiap hari 02:17 UTC (09:17 WIB)
+  "assets": {
+    "directory": ".",
+    "binding": "ASSETS"
+  }
+}
