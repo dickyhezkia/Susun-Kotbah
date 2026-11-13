@@ -133,6 +133,13 @@
   .hint{font-family:var(--mono); font-size:11px; color:var(--ink-faint); letter-spacing:.02em}
   .hint.warn{color:var(--rubric)}
   #composer.bridge > :not(.composer-actions){display:none}
+  #composer.bridge .btns{flex-direction:column; gap:10px}
+  .modeseg{display:flex; width:100%; margin:0 0 14px}
+  .modeseg button{flex:1 1 0; padding:11px 6px; font-size:12px}
+  #composer.eks .k-only, #composer.eks .points-box, #composer.eks #advToggle, #composer.eks #adv, #composer.eks #seriBanner{display:none !important}
+  #composer:not(.eks) .e-only{display:none !important}
+  #eksBtn{display:none}
+  #composer.bridge #eksBtn{display:block}
   #composer.bridge .composer-actions{flex-direction:column; align-items:stretch; text-align:center}
   #composer.bridge .hint{line-height:1.5}
   a.tool{text-decoration:none}
@@ -826,20 +833,33 @@
     </div>
 
   <div class="composer" id="composer">
+  <div class="seg modeseg" id="modeSeg" role="radiogroup" aria-label="Jenis bahan">
+    <button type="button" data-v="khotbah" aria-pressed="true">Khotbah</button>
+    <button type="button" data-v="eksegese" aria-pressed="false">Eksegese</button>
+  </div>
   <div class="seribanner" id="seriBanner" hidden></div>
   <div class="card">
     <div class="field">
-      <label class="eyebrow" for="ref">Teks utama &nbsp;<span class="opt">opsional — kosong = Claude pilihkan</span></label>
+      <label class="eyebrow k-only" for="ref">Teks utama &nbsp;<span class="opt">opsional — kosong = Claude pilihkan</span></label>
+      <label class="eyebrow e-only" for="ref">Ayat, perikop, atau cerita Alkitab &nbsp;<span class="opt">wajib</span></label>
       <textarea id="ref" rows="1" spellcheck="false" autocapitalize="words"
         placeholder="mis. Yohanes 15:1&ndash;8 &nbsp;&middot;&nbsp; Filipi 2:1&ndash;11 &nbsp;&middot;&nbsp; Lukas 15:11&ndash;32"></textarea>
       <div class="repeatwarn" id="repeatWarn" hidden></div>
     </div>
-    <div class="field">
+    <div class="field e-only">
+      <label class="eyebrow">Jenis teks</label>
+      <div class="seg seg3" id="jenisSeg" role="radiogroup" aria-label="Jenis teks">
+        <button type="button" data-v="ayat" aria-pressed="true">Ayat / perikop</button>
+        <button type="button" data-v="cerita" aria-pressed="false">Cerita (narasi)</button>
+      </div>
+      <div class="help" id="jenisHelp"></div>
+    </div>
+    <div class="field k-only">
       <label class="eyebrow" for="topic">Tema / topik &nbsp;<span class="opt">opsional</span></label>
       <input id="topic" type="text" spellcheck="false"
         placeholder="mis. Pemuridan &nbsp;&middot;&nbsp; Sikap dalam melayani &nbsp;&middot;&nbsp; Berbuah">
     </div>
-    <div class="field">
+    <div class="field k-only">
       <label class="eyebrow">Simpan ke folder</label>
       <div class="catpick" id="catPick" role="radiogroup" aria-label="Kategori khotbah"></div>
     </div>
@@ -851,7 +871,7 @@
       </div>
       <div class="help" id="langHelp">Bahan berbahasa Inggris akan diterjemahkan dulu, lalu naskah ditulis penuh dalam Bahasa Indonesia.</div>
     </div>
-    <div class="field">
+    <div class="field k-only">
       <label class="eyebrow">Gaya khotbah &nbsp;<span class="opt">boleh lebih dari satu</span></label>
       <div class="seg segwrap" id="gayaSeg" role="group" aria-label="Gaya khotbah">
         <button type="button" data-v="serius" aria-pressed="true">Serius</button>
@@ -867,7 +887,7 @@
       </div>
       <div class="help" id="gayaHelp"></div>
     </div>
-    <div class="field">
+    <div class="field k-only">
       <label class="eyebrow">Pembuka pendahuluan &nbsp;<span class="opt">boleh lebih dari satu</span></label>
       <div class="seg segwrap" id="introSeg" role="group" aria-label="Pembuka pendahuluan">
         <button type="button" data-v="cerita" aria-pressed="true">Cerita nyata</button>
@@ -877,7 +897,7 @@
       </div>
       <div class="help" id="introHelp"></div>
     </div>
-    <div class="field">
+    <div class="field k-only">
       <label class="eyebrow">Target durasi</label>
       <div class="seg segwrap" id="durSeg" role="radiogroup" aria-label="Target durasi">
         <button type="button" data-v="0" aria-pressed="true">Bebas</button>
@@ -887,7 +907,7 @@
       </div>
       <div class="help" id="durHelp"></div>
     </div>
-    <div class="field">
+    <div class="field k-only">
       <label class="eyebrow">Ilustrasi pribadi &nbsp;<span class="opt">dari Bank Ilustrasi</span></label>
       <div class="seg segwrap" id="ilusSeg" role="radiogroup" aria-label="Ilustrasi pribadi">
         <button type="button" data-v="off" aria-pressed="true">Tidak pakai</button>
@@ -933,6 +953,7 @@
     <div class="composer-actions">
       <div class="btns">
         <button class="primary" id="goBtn">Susun khotbah</button>
+        <button class="primary" id="eksBtn" type="button">Eksegese di Claude ↗</button>
       </div>
       <span class="hint" id="hint">Disusun lewat akun Claude-mu.</span>
     </div>
@@ -1113,11 +1134,11 @@ window.__SK_STORE__ = (function(){
       tabnav=$("#tabnav"), savedStage=$("#savedStage"), savedCount=$("#savedCount");
 
   var HKEY="susunkhotbah.history.v1";
-  var CATS=["Keluarga","Pemuridan","Keuangan","Kepemimpinan","Pelayanan","Karakter","Penginjilan","Doa & Ibadah","Hari Raya","Umum"];
+  var CATS=["Keluarga","Pemuridan","Keuangan","Kepemimpinan","Pelayanan","Karakter","Penginjilan","Doa & Ibadah","Hari Raya","Eksegese","Umum"];
   var CATCOL={
     "Keluarga":"#B5644C","Pemuridan":"#004E63","Keuangan":"#3E7A5E","Kepemimpinan":"#6A4E9C",
     "Pelayanan":"#1F7A8C","Karakter":"#9C6B2E","Penginjilan":"#A03D6B","Doa & Ibadah":"#4A6DA7",
-    "Hari Raya":"#8F2F2B","Umum":"#7B8994"
+    "Hari Raya":"#8F2F2B","Eksegese":"#4F5D2F","Umum":"#7B8994"
   };
   function catColor(c){ return CATCOL[c] || CATCOL["Umum"]; }
   var sampleFn=null, dlFn=null, ctl=null, currentView="compose", currentRef="", lastOpts=null,
@@ -1539,6 +1560,71 @@ window.__SK_STORE__ = (function(){
 "",
 "METODE OIA (wajib): bagian 2–4 adalah Observasi → Interpretasi → Aplikasi. Observasi = apa yang dikatakan teks (konteks utuh, jenis teks, kepada siapa). Interpretasi = apa artinya bagi pendengar mula-mula, lalu prinsip abadinya (universal atau khusus?). Aplikasi = apa artinya bagi kita sekarang. Tiap poin Interpretasi HARUS lahir dari temuan Observasi (sebut temuannya), dan tiap Aplikasi HARUS lahir dari poin Interpretasinya — tidak ada lompatan. Bila cocok, arahkan aplikasi ke visi JB3: menjadi murid → berakar di gereja lokal/HOME → menjadi berkat bagi bangsa."
   ].join("\n");
+  /* ---------- EKSEGESE (skill "eksegese" + masukan skill GitHub) ----------
+     Dasar: skill eksegese JB3 (6 bagian observasi + prinsip).
+     Diperkaya: cblack34/theology-skills (baca dalam alur argumen kitab, tandai
+     dugaan, PL di PB → Masoret vs LXX), WayneShow7/biblical-passage-exegesis
+     (batas & fungsi perikop, inti satu kalimat, struktur kata sambung, aspek
+     kata kerja, tanpa etimologi), Robert Alter (narasi: Leitwort, adegan-tipe,
+     dialog, pengulangan & variasi, diamnya narator). */
+  var mode  = (function(){ try{ return localStorage.getItem("susunkhotbah.mode")==="eksegese"?"eksegese":"khotbah"; }catch(e){ return "khotbah"; } })();
+  var jenis = (function(){ try{ return localStorage.getItem("susunkhotbah.jenis")==="cerita"?"cerita":"ayat"; }catch(e){ return "ayat"; } })();
+  function buildEksPrompt(o){
+    var en = o.lang==="en", cerita = o.jenis==="cerita";
+    var H = en
+      ? ["## 1. Written by Whom","## 2. Addressed to Whom","## 3. Context of the Story","## 4. Terminology","## 5. Customs, Traditions & the Situation of That Time","## 6. Principles Contained"]
+      : ["## 1. Ditulis oleh Siapa","## 2. Ditujukan kepada Siapa","## 3. Konteks Cerita","## 4. Terminologi","## 5. Adat Istiadat, Tradisi & Situasi Zaman Itu","## 6. Prinsip yang Terkandung"];
+    if(en) return [
+      "You are helping a pastor at Church JB3 make an OBSERVATION study (exegesis) of a Bible text. Sections 1–5 are pure observation (what the text says and its world) — no interpretation of meaning beyond what the text shows, no application, no devotional tone. Section 6 draws principles straight from the observation.",
+      "TEXT: "+o.ref+"  (type: "+(cerita?"NARRATIVE / story":"verse(s) / passage")+")",
+      "If the reference is a story name rather than a verse range (e.g. 'David and Goliath'), first identify the exact passage and use it.",
+      "Write the ENTIRE study in ENGLISH; quote Scripture from the ESV (note NASB where it sharpens a phrase).",
+      "",
+      "REQUIRED STRUCTURE (markdown, no other sections):",
+      "- First line: '# <passage reference> — Observation'.",
+      "- Quote the passage as a blockquote (ESV; for long narratives quote the key verses and summarise the rest). If a major translation differs sharply on a phrase, add one note line.",
+      "- Then one line: '**Core of the passage:** <one complete sentence stating what this passage says/does in its book>'.",
+      "- "+H.join("  ·  "),
+      "",
+      "WHAT EACH SECTION CONTAINS:",
+      H[0]+": author (named by the text or held by tradition) and approximate date, per established scholarship.",
+      H[1]+": first recipients; for each statement/command/promise/warning, who it is addressed to INSIDE the text (one person, a specific group, general). Cite the textual markers (pronouns, vocatives, singular/plural 'you'). Note whether it is narrated event or direct address. Do NOT decide here whether it binds everyone.",
+      H[2]+": the passage's boundaries and its FUNCTION in the book's flow/argument; what immediately precedes and follows; who/what/when/where. "+(cerita
+        ? "For a NARRATIVE: lay out the scenes; note the Leitwort (a key word repeated through the story), any type-scene (e.g. meeting at a well, barren wife, call narrative), each main character's FIRST words in dialogue, repetition with small variation, and what the narrator conspicuously does NOT say (reticence)."
+        : "For an argument/poetry text: trace its structure through the connectives (because, therefore, but, so that) and the main verbs; read each sentence inside the paragraph and the book's argument — never as an isolated proof-text."),
+      H[3]+": 3–6 key words: Hebrew/Greek term + transliteration, literal meaning & range, important uses elsewhere in the book/author; idioms. Mention verb tense/aspect (e.g. aorist, present, perfect; Hebrew wayyiqtol) ONLY where it carries weight, and say what it does. Do not let etymology decide meaning. If the NT quotes/alludes to the OT here, compare the Masoretic text and the Septuagint and say which the NT follows and what that changes. Flag disputed meanings.",
+      H[4]+": daily customs, social structure, economy, geography; Hebrew & Jewish traditions the text assumes (Torah & law, feasts & sabbath, temple/synagogue worship, purity, kinship & inheritance, honour–shame, oaths); Greco-Roman background where relevant. Mark where a custom described in later rabbinic sources may postdate the passage.",
+      H[5]+": 2–5 principles — truths the passage teaches — each naming which observation section grounds it, and marking whether it looks tied to the original situation or appears to apply more broadly. State them as PRINCIPLES, not action steps or 'you must' advice.",
+      "",
+      "SOURCES & HONESTY: draw on established lexicons (BDAG, HALOT, TDNT), recognised commentaries, and David Pawson (Unlocking the Bible; 'Come with me through…') as one voice for author, recipients and Hebrew/Jewish background — name a distinctive Pawson reading as his view and give the mainstream one. Where scholars genuinely disagree, say so. Label historical reconstruction or unstated authorial intent as inference ('the text does not say this'). Never invent verse numbers, transliterations, dates, manuscript data or customs — if unsure, say you are unsure.",
+      "Concise, calm, orderly. No application, no devotional tone."
+    ].join("\n");
+    return [
+      "Kamu membantu seorang pendeta Gereja JB3 membuat STUDI PENGAMATAN (eksegese/observasi) atas sebuah teks Alkitab. Bagian 1–5 murni pengamatan (apa yang teks katakan dan dunianya) — tanpa menafsir makna melampaui yang ditunjukkan teks, tanpa aplikasi, tanpa nada renungan. Bagian 6 menarik prinsip langsung dari pengamatan.",
+      "TEKS: "+o.ref+"  (jenis: "+(cerita?"CERITA / narasi":"ayat / perikop")+")",
+      "Bila yang ditulis adalah nama cerita, bukan rujukan ayat (mis. 'Daud dan Goliat'), tentukan dulu perikopnya yang tepat lalu pakai itu.",
+      "Tulis SELURUH studi dalam BAHASA INDONESIA; kutip Alkitab dari TB LAI.",
+      "",
+      "STRUKTUR WAJIB (markdown, jangan menambah bagian lain):",
+      "- Baris pertama: '# <rujukan perikop> — Observasi'.",
+      "- Kutip perikop sebagai blockquote (TB LAI; untuk narasi panjang kutip ayat-ayat kunci dan ringkas sisanya). Bila terjemahan besar lain jauh berbeda pada sebuah frasa, tambahkan satu baris catatan.",
+      "- Lalu satu baris: '**Inti perikop:** <satu kalimat utuh tentang apa yang dikatakan/dilakukan perikop ini di dalam kitabnya>'.",
+      "- "+H.join("  ·  "),
+      "",
+      "ISI TIAP BAGIAN:",
+      H[0]+": penulis (yang disebut teks atau dipegang tradisi) dan kira-kira kapan — dari kesarjanaan mapan.",
+      H[1]+": penerima pertama; dan untuk tiap pernyataan/perintah/janji/peringatan, kepada siapa ditujukan DI DALAM teks: satu tokoh, kelompok tertentu (Israel, jemaat tertentu), atau umum. Kutip penanda tekstualnya (kata ganti, sapaan, 'kamu' tunggal/jamak). Catat apakah pemerian peristiwa atau sapaan langsung. JANGAN memutuskan di sini apakah mengikat semua orang.",
+      H[2]+": batas perikop dan FUNGSINYA dalam alur/argumen kitab; situasi & maksud di baliknya; apa yang langsung mendahului & mengikuti; siapa/apa/kapan/di mana. "+(cerita
+        ? "Untuk CERITA/narasi: uraikan adegan-adegannya; tunjukkan kata kunci yang berulang di sepanjang cerita (Leitwort), pola adegan baku bila ada (mis. pertemuan di sumur, perempuan mandul, kisah panggilan), KATA-KATA PERTAMA tiap tokoh utama dalam dialog, pengulangan dengan variasi kecil, dan apa yang sengaja TIDAK diceritakan narator."
+        : "Untuk ayat/perikop (surat, nubuat, puisi): telusuri strukturnya lewat kata sambung (sebab, karena itu, tetapi, supaya) dan kata kerja utamanya; baca tiap kalimat di dalam paragraf dan argumen kitab — jangan dipenggal menjadi ayat lepas."),
+      H[3]+": 3–6 kata kunci: istilah asli Ibrani/Yunani + transliterasi, makna harfiah & rentang makna, pemakaian penting di tempat lain dalam kitab/penulis itu; idiom khas. Sebut bentuk waktu/aspek kata kerja (mis. aoris, presens, perfek; wayyiqtol Ibrani) HANYA bila menentukan makna, dan jelaskan perannya. Jangan menyimpulkan makna dari asal-usul kata (etimologi). Bila PB mengutip/menyinggung PL di sini, bandingkan teks Masoret dan Septuaginta (LXX) — sebut yang diikuti PB dan apa bedanya. Tandai makna yang diperdebatkan.",
+      H[4]+": adat istiadat sehari-hari, struktur sosial, ekonomi, geografi; tradisi Ibrani & Yahudi yang diandaikan/disinggung teks: Taurat & hukum, hari raya & sabat, ibadah Bait Allah/sinagoge, kemurnian, kekerabatan & warisan, kehormatan–malu, sumpah; latar Yunani–Romawi bila relevan. Tandai bila sebuah adat (mis. dari sumber rabinik) mungkin lebih belakangan dari zaman perikop.",
+      H[5]+": 2–5 prinsip — kebenaran yang diajarkan perikop — tiap prinsip menyebut bagian pengamatan mana yang mendasarinya, dan menandai apakah tampak terikat pada situasi asli atau tampak berlaku lebih luas. Nyatakan sebagai PRINSIP, bukan langkah aplikasi atau nasihat 'kamu harus'.",
+      "",
+      "SUMBER & KEJUJURAN: pakai leksikon mapan (BDAG, HALOT, TDNT), komentari yang dikenal, dan David Pawson (Unlocking the Bible; seri 'Come with me through…') sebagai salah satu suara untuk penulis, penerima, dan latar Ibrani/Yahudi — bila bacaan Pawson khas, sebut sebagai pandangan Pawson dan cantumkan pandangan arus utama. Bila para ahli sungguh berbeda pendapat, katakan eksplisit. Tandai rekonstruksi sejarah atau maksud penulis yang tak tertulis sebagai dugaan ('teks tidak mengatakan ini'). Jangan mengarang nomor ayat, transliterasi, tanggal, data manuskrip, atau adat — bila ragu, katakan ragu.",
+      "Ringkas, tenang, tertata. Tanpa aplikasi, tanpa nada renungan."
+    ].join("\n");
+  }
   function buildPrompt(o){
     var hasPts = (o.points && o.points.trim()) || o.imgCount;
     var en = o.lang === "en";
@@ -1757,6 +1843,7 @@ TAIL
     "Penginjilan":'<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18"/>',
     "Doa & Ibadah":'<path d="M12 3c2 3 5 5 5 9a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3 0-5 1-7.5z"/>',
     "Hari Raya":'<path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.5 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/>',
+    "Eksegese":'<circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 6 6"/><path d="M8 9h5M8 12h4"/>',
     "Umum":'<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21a2 2 0 0 1 2-2h13v2"/><path d="M12 7v6M9 10h6"/>'
   };
   function catIcon(c){ return '<svg viewBox="0 0 24 24" aria-hidden="true">'+(CATICON[c]||CATICON["Umum"])+'</svg>'; }
@@ -2557,6 +2644,7 @@ TAIL
     var ref=(refEl.value||"").trim();
     // teks utama opsional: bila kosong, Claude memilihkan perikop (lihat buildPrompt)
     return {
+      mode:mode, jenis:jenis,
       ref:ref, topic:(topicEl.value||"").trim(), points:(pointsEl.value||"").trim(),
       occ:(occEl.value||"").trim(), old:(oldEl.value||"").trim(), cat:composeCat,
       imgCount:imgFiles.length, imgs:imgFiles.slice(), lang:lang,
@@ -2569,8 +2657,10 @@ TAIL
   function startRun(force){
     var o = lastOpts || readForm();
     if(!o) return;
+    if(o.mode==="eksegese" && !o.ref){ toast("Tulis ayat, perikop, atau nama cerita dulu."); refEl.focus(); return; }
     lastOpts=o;
     if(!sampleFn) return;
+    if(o.mode==="eksegese") o.cat="Eksegese";
     currentRef = o.ref || o.topic || (o.imgCount ? o.imgCount+" gambar poin" : "Khotbah");
     currentHistId=null; currentCat=o.cat||"Umum";
     readFrom="compose"; showView("read");
@@ -2580,7 +2670,15 @@ TAIL
     var opt={ modelTier:"complex", cache:force?false:true, signal:ctl.signal,
       onText:function(u){ if(currentView!=="read" || ctl!==myCtl) return; var art=$("#analysis"), th=document.querySelector(".thinking"); if(th) th.remove(); if(art) art.innerHTML=mdToHtml(u.text); } };
     if(o.imgs && o.imgs.length) opt.images=o.imgs;
-    sampleFn(buildPrompt(o), opt).then(function(res){
+    sampleFn(o.mode==="eksegese" ? buildEksPrompt(o) : buildPrompt(o), opt).then(function(res){
+      if(o.mode==="eksegese"){
+        currentHistId = addHist(o.ref+" — Observasi", ["Eksegese", o.jenis==="cerita"?"cerita":"ayat", o.lang==="en"?"EN":""].filter(Boolean).join(" · "), res.text, "Eksegese");
+        currentCat="Eksegese";
+        currentRef=o.ref+" — Observasi";
+        if(currentView==="read"){ renderResult(res.text, { done:true, truncated:res.truncated }); scrollTop(); }
+        toast("Tersimpan di folder Eksegese");
+        return;
+      }
       currentHistId = addHist(o.ref || plainTitle(res.text), [o.lang==="en"?"EN":"", [].concat(o.gaya||[]).map(function(k){ return GAYA_LABEL[k]; }).join("+"), o.topic, o.occ, o.points?"+poin":"", o.imgCount?"+"+o.imgCount+" gambar":""].filter(Boolean).join(" · "), res.text, o.cat);
       currentCat = o.cat || "Umum";
       afterCompose(currentHistId, o);
@@ -3675,6 +3773,23 @@ used.length ? "Perikop/judul yang SUDAH ADA di arsip pengkhotbah (hindari, kecua
 
   $("#catPick").innerHTML = catPickHtml(composeCat);
   wireCatPick($("#catPick"), function(c){ composeCat=c; lastOpts=null; });
+  var JENIS_HELP={ ayat:"Surat, nubuat, puisi, ucapan Yesus: alur argumen lewat kata sambung, kata kerja utama, kata asli.", cerita:"Kisah/narasi: adegan, kata kunci yang berulang, dialog tokoh, apa yang tidak diceritakan narator." };
+  function applyMode(){
+    $("#composer").classList.toggle("eks", mode==="eksegese");
+    Array.prototype.forEach.call($("#modeSeg").querySelectorAll("button"), function(b){ b.setAttribute("aria-pressed", b.dataset.v===mode?"true":"false"); });
+    Array.prototype.forEach.call($("#jenisSeg").querySelectorAll("button"), function(b){ b.setAttribute("aria-pressed", b.dataset.v===jenis?"true":"false"); });
+    $("#jenisHelp").textContent=JENIS_HELP[jenis];
+    var ist=$("#introStage"); if(ist) ist.hidden = (mode==="eksegese" && !!sampleFn);
+    if(sampleFn) goBtn.textContent = mode==="eksegese" ? "Buat eksegese" : "Susun khotbah";
+    refEl.placeholder = mode==="eksegese" ? "mis. Rut 1:1–22  ·  Roma 5:1–11  ·  Kisah Daud dan Goliat" : "mis. Yohanes 15:1–8  ·  Filipi 2:1–11  ·  Lukas 15:11–32";
+    var sh=document.querySelector("#view-compose .screenhead");
+    if(sh && sampleFn){ sh.querySelector("h2").textContent = mode==="eksegese" ? "Eksegese / observasi" : "Susun khotbah baru";
+      sh.querySelector("p").innerHTML = mode==="eksegese" ? "Studi pengamatan perikop: penulis, penerima, konteks, kata asli, adat zaman itu &mdash; lalu prinsipnya." : "Isi teks utama &mdash; Claude menyusun naskah empat bagian gaya JB3."; }
+  }
+  Array.prototype.forEach.call($("#modeSeg").querySelectorAll("button"), function(b){ b.onclick=function(){ mode=b.dataset.v; lastOpts=null; try{ localStorage.setItem("susunkhotbah.mode",mode); }catch(e){} applyMode(); }; });
+  Array.prototype.forEach.call($("#jenisSeg").querySelectorAll("button"), function(b){ b.onclick=function(){ jenis=b.dataset.v; lastOpts=null; try{ localStorage.setItem("susunkhotbah.jenis",jenis); }catch(e){} applyMode(); }; });
+  applyMode();
+  $("#eksBtn").onclick=function(){ window.open(CLAUDE_URL,"_blank","noopener"); };
 
   refreshHistCount(); autoGrow(refEl,140);
   if(!cloud) histCache = readLS().map(normItem);   // tampil instan dari salinan lokal
@@ -3692,7 +3807,7 @@ used.length ? "Perikop/judul yang SUDAH ADA di arsip pengkhotbah (hindari, kecua
   (window.claude && window.claude.use ? window.claude.use("sample") : Promise.resolve(null))
     .then(function(fn){
       if(fn){
-        sampleFn=fn; goBtn.disabled=false; hint.textContent="Disusun lewat akun Claude-mu.";
+        sampleFn=fn; goBtn.disabled=false; hint.textContent="Disusun lewat akun Claude-mu."; applyMode();
         (fn.limits ? fn.limits() : Promise.reject()).then(function(lim){
           if(lim && lim.images){
             imgLimit=lim.images;
@@ -3709,10 +3824,11 @@ used.length ? "Perikop/judul yang SUDAH ADA di arsip pengkhotbah (hindari, kecua
   function bridgeMode(){
     $("#composer").classList.add("bridge");
     var sh=document.querySelector("#view-compose .screenhead p");
-    if(sh) sh.textContent="Naskah disusun oleh Claude di claude.ai (memakai langganan Claude-mu), lalu dikirim balik ke arsip JB3 Kotbah.";
+    if(sh) sh.textContent="Naskah khotbah dan eksegese disusun oleh Claude di claude.ai (memakai langganan Claude-mu), lalu dikirim balik ke arsip JB3 Kotbah.";
+    var h2=document.querySelector("#view-compose .screenhead h2"); if(h2) h2.textContent="Susun khotbah & eksegese";
     goBtn.disabled=false; goBtn.textContent="Susun di Claude ↗";
     goBtn.onclick=function(e){ e.stopImmediatePropagation(); window.open(CLAUDE_URL,"_blank","noopener"); };
-    hint.innerHTML="Isi teks &amp; susun di Claude. Setelah naskah jadi, ketuk <b>Kirim ke JB3 Kotbah</b> &mdash; naskah otomatis masuk ke arsip di sini.";
+    hint.innerHTML="Di Claude, pilih <b>Khotbah</b> atau <b>Eksegese</b> di atas formulir. Setelah hasilnya jadi, ketuk <b>Kirim ke JB3 Kotbah</b> &mdash; otomatis masuk ke arsip di sini (eksegese ke folder <b>Eksegese</b>).";
   }
 
   $("#ptsFile").onclick=function(){ pickFileInto(pointsEl, this); };
