@@ -6,9 +6,9 @@
 <meta name="theme-color" content="#E3E6EA" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0E131A" media="(prefers-color-scheme: dark)">
 <meta name="description" content="Susun naskah khotbah gaya Gereja JB3 — aplikasi di HP.">
-<link rel="icon" type="image/png" sizes="32x32" href="./favicon.png?v=2">
-<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png?v=2">
-<link rel="apple-touch-icon" href="./apple-touch-icon.png?v=2">
+<link rel="icon" type="image/png" sizes="32x32" href="./favicon.png?v=3">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png?v=3">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png?v=3">
 <style>[hidden]{display:none!important}img{max-width:100%}</style>
 <title>JB3 Kotbah</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,7 +19,7 @@
     --ground:#E3E6EA; --surface:#F3F5F7; --raised:#FBFCFD;
     --ink:#1B2530; --ink-soft:#485560; --ink-faint:#7B8994;
     --line:#C9D0D7; --line-soft:#DCE1E6;
-    --accent:#2C468A; --accent-ink:#20356B; --accent-soft:#DBE1F0; --on-accent:#FBFCFD;
+    --accent:#004E63; --accent-ink:#003A4A; --accent-soft:#D3E8EA; --on-accent:#FBFCFD;
     --rubric:#8F2F2B; --rubric-soft:#EDDAD8;
     --serif:"Libre Caslon Text",Georgia,"Times New Roman",serif;
     --text:"Spectral",Georgia,"Times New Roman",serif;
@@ -31,7 +31,7 @@
       --ground:#11161D; --surface:#1A212B; --raised:#212A35;
       --ink:#DCE2E8; --ink-soft:#9AA6B1; --ink-faint:#6C7883;
       --line:#2B3540; --line-soft:#222B35;
-      --accent:#8AA8E6; --accent-ink:#AAC0EE; --accent-soft:#26324A; --on-accent:#12171E;
+      --accent:#5CC4C2; --accent-ink:#8ED8D5; --accent-soft:#173A40; --on-accent:#12171E;
       --rubric:#DA867F; --rubric-soft:#382A29;
     }
   }
@@ -39,7 +39,7 @@
     --ground:#11161D; --surface:#1A212B; --raised:#212A35;
     --ink:#DCE2E8; --ink-soft:#9AA6B1; --ink-faint:#6C7883;
     --line:#2B3540; --line-soft:#222B35;
-    --accent:#8AA8E6; --accent-ink:#AAC0EE; --accent-soft:#26324A; --on-accent:#12171E;
+    --accent:#5CC4C2; --accent-ink:#8ED8D5; --accent-soft:#173A40; --on-accent:#12171E;
     --rubric:#DA867F; --rubric-soft:#382A29;
   }
 
@@ -467,14 +467,14 @@
   /* ---- beranda ---- */
   .hero{
     position:relative; overflow:hidden; border-radius:20px; padding:20px 18px 18px; margin:0 0 14px;
-    background:linear-gradient(135deg, var(--accent) 0%, #3F5FA8 60%, #5B4E9C 100%); color:#fff;
+    background:linear-gradient(135deg, var(--accent) 0%, #0A6E7A 60%, #0E9895 100%); color:#fff;
     box-shadow:var(--shadow);
   }
   .hero::after{content:""; position:absolute; right:-40px; top:-40px; width:170px; height:170px; border-radius:50%; background:rgba(255,255,255,.08)}
   .hero .greet{margin:0; font-family:var(--mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; opacity:.8}
   .hero h2{position:relative; z-index:1; font-family:var(--serif); font-size:21px; line-height:1.28; margin:6px 0 16px; max-width:17em}
-  .hero-cta{position:relative; z-index:1; display:inline-flex; align-items:center; gap:8px; background:#fff; color:#20356B; border-color:#fff}
-  .hero-cta:hover{background:#EEF2FA; border-color:#EEF2FA; color:#20356B}
+  .hero-cta{position:relative; z-index:1; display:inline-flex; align-items:center; gap:8px; background:#fff; color:#003A4A; border-color:#fff}
+  .hero-cta:hover{background:#E6F3F3; border-color:#E6F3F3; color:#003A4A}
   .hero-cta svg{width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round}
 
   .stats{display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin:0 0 20px}
@@ -997,7 +997,7 @@ window.__SK_STORE__ = (function(){
       +     'border-radius:9px;background:#161D26;color:#DCE2E8;margin-bottom:9px">'
       +   '<button type="submit" id="skB" style="width:100%;padding:12px;font-size:11px;font-family:inherit;'
       +     'letter-spacing:.08em;text-transform:uppercase;font-weight:700;border:0;border-radius:9px;'
-      +     'background:#8AA8E6;color:#12171E;cursor:pointer">Masuk</button>'
+      +     'background:#5CC4C2;color:#12171E;cursor:pointer">Masuk</button>'
       + '</form>'
       + '<div id="skM" style="font-size:12px;line-height:1.5;color:#9AA6B1;margin-top:12px;'
       +   'word-break:break-word;white-space:pre-wrap"></div>'
@@ -1115,7 +1115,7 @@ window.__SK_STORE__ = (function(){
   var HKEY="susunkhotbah.history.v1";
   var CATS=["Keluarga","Pemuridan","Keuangan","Kepemimpinan","Pelayanan","Karakter","Penginjilan","Doa & Ibadah","Hari Raya","Umum"];
   var CATCOL={
-    "Keluarga":"#B5644C","Pemuridan":"#2C468A","Keuangan":"#3E7A5E","Kepemimpinan":"#6A4E9C",
+    "Keluarga":"#B5644C","Pemuridan":"#004E63","Keuangan":"#3E7A5E","Kepemimpinan":"#6A4E9C",
     "Pelayanan":"#1F7A8C","Karakter":"#9C6B2E","Penginjilan":"#A03D6B","Doa & Ibadah":"#4A6DA7",
     "Hari Raya":"#8F2F2B","Umum":"#7B8994"
   };
@@ -1380,7 +1380,7 @@ window.__SK_STORE__ = (function(){
       "<head><meta charset='utf-8'><title>"+title+"</title>"+
       "<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]-->"+
       "<style>@page{size:A4;margin:2.2cm} body{font-family:'Times New Roman',Georgia,serif;font-size:12pt;line-height:1.5;color:#141920}"+
-      "h1{font-size:19pt;margin:0 0 12pt} h2{font-size:14pt;color:#20356B;margin:16pt 0 6pt}"+
+      "h1{font-size:19pt;margin:0 0 12pt} h2{font-size:14pt;color:#003A4A;margin:16pt 0 6pt}"+
       "h3{font-size:10pt;letter-spacing:.04em;text-transform:uppercase;color:#6E7882;margin:10pt 0 4pt}"+
       "p{margin:0 0 7pt} blockquote{margin:0 0 8pt 1cm;font-style:italic;color:#3C4650}</style></head><body>"+
       body+"</body></html>";
