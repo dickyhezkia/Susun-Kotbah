@@ -2601,14 +2601,53 @@ TAIL
       var id=addHist(o.ref||"Khotbah", o.sub||"", o.text, CATS.indexOf(o.cat)>=0 ? o.cat : "Umum");
       if(o.lang) patchHist(id,{ lang:o.lang });
       openSermon(id,"saved");
-      toast("Naskah dari Claude tersimpan di arsip JB3 Kotbah.");
+      try{ localStorage.removeItem(AWAIT_KEY); }catch(e){}
+      toast(isStandalone() ? "Naskah dari Claude tersimpan di arsip JB3 Kotbah."
+        : "Tersimpan di arsip. Kembali ke aplikasi JB3 Kotbah — naskahnya terbuka otomatis.");
     }).catch(function(){ toast("Kiriman dari Claude tidak bisa dibaca — salin naskahnya lalu pakai + Tambah."); });
   }
 
   /* ---------- pasang di HP (Safari → Layar Utama) ---------- */
   var CLAUDE_URL="https://claude.ai/artifact/Ewfky77oSF2rYrTWiyKERT";
   var BRIDGE=false;   // true di situs (tanpa sample): Susun langsung membuka Claude
-  function openClaude(){ window.open(CLAUDE_URL,"_blank","noopener"); }
+  /* Kembali dari Claude: catat naskah yang sudah ada saat membuka Claude; saat app tampil lagi,
+     muat ulang arsip dan buka otomatis naskah baru yang masuk lewat "Kirim ke JB3 Kotbah". */
+  var AWAIT_KEY="susunkhotbah.awaitClaude";
+  function openClaude(){
+    try{ localStorage.setItem(AWAIT_KEY, JSON.stringify({ t:Date.now(), ids:histCache.map(function(x){ return x.id; }) })); }catch(e){}
+    window.open(CLAUDE_URL,"_blank","noopener");
+  }
+  function readAwait(){
+    try{ var a=JSON.parse(localStorage.getItem(AWAIT_KEY)||"null"); if(a && Date.now()-a.t < 6*3600e3) return a; }catch(e){}
+    return null;
+  }
+  function openNewFromClaude(rows){
+    var a=readAwait(); if(!a) return false;
+    var fresh=(rows||histCache).filter(function(x){ return a.ids.indexOf(x.id)<0; })
+      .sort(function(x,y){ return String(y.ts).localeCompare(String(x.ts)); });
+    if(!fresh.length) return false;
+    try{ localStorage.removeItem(AWAIT_KEY); }catch(e){}
+    openSermon(fresh[0].id,"saved");
+    toast(fresh.length>1 ? fresh.length+" naskah baru dari Claude sudah masuk arsip." : "Naskah dari Claude sudah masuk — ini dia.");
+    return true;
+  }
+  var returnTimers=[];
+  function checkReturnFromClaude(){
+    if(!BRIDGE || !cloud || !readAwait()) return;
+    returnTimers.forEach(clearTimeout); returnTimers=[];
+    // Safari butuh beberapa detik untuk menyimpan kiriman → cek beberapa kali
+    [0,3000,8000,15000,30000].forEach(function(ms){
+      returnTimers.push(setTimeout(function(){
+        if(document.hidden || !readAwait()) return;
+        Store.load().then(function(rows){
+          histCache=(rows||[]).map(normItem); refreshHistCount(); refreshLiveViews();
+          if(openNewFromClaude(histCache)){ returnTimers.forEach(clearTimeout); returnTimers=[]; }
+        }, function(){});
+      }, ms));
+    });
+  }
+  document.addEventListener("visibilitychange", function(){ if(!document.hidden) checkReturnFromClaude(); });
+  window.addEventListener("pageshow", function(e){ if(e.persisted) checkReturnFromClaude(); });
   var SITE_URL="https://susun-kotbah.dickyhezkia.workers.dev/";
   var APP_URL=SITE_URL;
   function isStandalone(){
@@ -2695,7 +2734,10 @@ TAIL
     if(re) re.onclick=function(){ startRun(true); };
     if(cp) cp.onclick=function(){ copyAll(lbl(cp)); };
     var kb=$("#kirimBtn");
-    if(kb) bridgeLink(text, g ? g.item : null).then(function(u){ kb.href=u; kb.removeAttribute("aria-disabled"); });
+    if(kb){
+      bridgeLink(text, g ? g.item : null).then(function(u){ kb.href=u; kb.removeAttribute("aria-disabled"); });
+      kb.addEventListener("click", function(){ setTimeout(function(){ toast("Terkirim. Kembali ke aplikasi JB3 Kotbah — naskahnya terbuka otomatis."); }, 600); });
+    }
     if(dl) dl.onclick=function(){
       openSheet('<h3>Unduh naskah</h3>' +
         '<button class="sheet-item" data-k="docx">'+I.dl+'<span><b>Word (.docx)</b><small>Untuk diedit di Word / Google Docs</small></span></button>' +
@@ -3953,6 +3995,7 @@ used.length ? "Perikop/judul yang SUDAH ADA di arsip pengkhotbah (hindari, kecua
     .catch(function(){ bridgeMode(); });
   function bridgeMode(){
     BRIDGE=true;
+    checkReturnFromClaude();   // app sempat ditutup iOS saat di Claude → cek kiriman baru
     $("#composer").classList.add("bridge");
     var sh=document.querySelector("#view-compose .screenhead p");
     if(sh) sh.textContent="Naskah khotbah dan eksegese disusun oleh Claude di claude.ai (memakai langganan Claude-mu), lalu dikirim balik ke arsip JB3 Kotbah.";
