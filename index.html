@@ -138,6 +138,11 @@
   .modeseg button{flex:1 1 0; padding:11px 6px; font-size:12px}
   #composer.eks .k-only, #composer.eks .points-box, #composer.eks #advToggle, #composer.eks #adv, #composer.eks #seriBanner{display:none !important}
   #composer:not(.eks) .e-only{display:none !important}
+  /* Naratif/Tekstual: tipe khotbah sudah ditentukan mode → sembunyikan chip tipe yang bentrok */
+  #composer.m-naratif #gayaSeg [data-v="ekspositori"], #composer.m-naratif #gayaSeg [data-v="tekstual"], #composer.m-naratif #gayaSeg [data-v="storytelling"],
+  #composer.m-tekstual #gayaSeg [data-v="ekspositori"], #composer.m-tekstual #gayaSeg [data-v="tekstual"], #composer.m-tekstual #gayaSeg [data-v="storytelling"]{display:none}
+  #modeHelp{margin:-6px 0 12px; font-size:12px}
+  #modeHelp:empty{display:none}
   #eksBtn{display:none}
   #composer.bridge #eksBtn{display:block}
   #composer.bridge .composer-actions{flex-direction:column; align-items:stretch; text-align:center}
@@ -835,8 +840,11 @@
   <div class="composer" id="composer">
   <div class="seg modeseg" id="modeSeg" role="radiogroup" aria-label="Jenis bahan">
     <button type="button" data-v="khotbah" aria-pressed="true">Khotbah</button>
+    <button type="button" data-v="naratif" aria-pressed="false">Naratif</button>
+    <button type="button" data-v="tekstual" aria-pressed="false">Tekstual</button>
     <button type="button" data-v="eksegese" aria-pressed="false">Eksegese</button>
   </div>
+  <div class="help" id="modeHelp"></div>
   <div class="seribanner" id="seriBanner" hidden></div>
   <div class="card">
     <div class="field">
@@ -1567,7 +1575,8 @@ window.__SK_STORE__ = (function(){
      (batas & fungsi perikop, inti satu kalimat, struktur kata sambung, aspek
      kata kerja, tanpa etimologi), Robert Alter (narasi: Leitwort, adegan-tipe,
      dialog, pengulangan & variasi, diamnya narator). */
-  var mode  = (function(){ try{ return localStorage.getItem("susunkhotbah.mode")==="eksegese"?"eksegese":"khotbah"; }catch(e){ return "khotbah"; } })();
+  var MODES=["khotbah","naratif","tekstual","eksegese"];
+  var mode  = (function(){ try{ var v=localStorage.getItem("susunkhotbah.mode"); return MODES.indexOf(v)>=0?v:"khotbah"; }catch(e){ return "khotbah"; } })();
   var jenis = (function(){ try{ return localStorage.getItem("susunkhotbah.jenis")==="cerita"?"cerita":"ayat"; }catch(e){ return "ayat"; } })();
   function buildEksPrompt(o){
     var en = o.lang==="en", cerita = o.jenis==="cerita";
@@ -1656,6 +1665,11 @@ window.__SK_STORE__ = (function(){
       ? "- Open with a SIMPLE CHECKLIST GAME the congregation can do from their seats (no props needed): a short instruction (e.g. 'Tick in your head — or raise your hand — for each one that is true of you this week'), then 5–7 checklist items, each as its own list line beginning with '- ☐ ', relatable everyday situations that lead into the sermon's main principle (light and honest, never shaming). Then one line on how to 'score' it (e.g. 'If you ticked 4 or more…') and a bridge sentence into the topic."
       : "- Buka dengan GAMES SEDERHANA berupa CHECKLIST yang bisa dilakukan jemaat dari tempat duduk (tanpa alat): instruksi singkat (mis. 'Centang dalam hati — atau angkat tangan — untuk setiap yang benar terjadi pada Anda minggu ini'), lalu 5–7 butir checklist, tiap butir satu baris daftar diawali '- ☐ ', berisi situasi sehari-hari yang relatable dan mengarah ke prinsip utama khotbah (ringan & jujur, tidak mempermalukan). Lalu satu baris cara 'menghitung skor' (mis. 'Kalau Anda mencentang 4 atau lebih…') dan kalimat jembatan ke topik.";
     var introSel = [].concat(o.intro || ["cerita"]), gayaSel = [].concat(o.gaya || ["serius"]);
+    var NAR = o.mode==="naratif", TEKS = o.mode==="tekstual";
+    if(NAR || TEKS){   // tipe khotbah sudah ditentukan mode → buang chip tipe yang bentrok
+      gayaSel = gayaSel.filter(function(k){ return ["ekspositori","tekstual","storytelling"].indexOf(k)<0; });
+      if(!gayaSel.length) gayaSel=["serius"];
+    }
     var INTRO = [];
     if(introSel.indexOf("cerita")>=0) INTRO.push(STORY);
     if(introSel.indexOf("riset")>=0)  INTRO.push(RESEARCH);
@@ -1705,11 +1719,32 @@ window.__SK_STORE__ = (function(){
     var TAIL = en
       ? "Concise, warm, ready to preach from the pulpit. No filler."
       : "Padat, hangat, siap dibawakan dari mimbar. Hindari basa-basi.";
-    var L=[
-"Kamu menyusun NASKAH KHOTBAH lengkap gaya Gereja JB3 dari sebuah ayat/perikop Alkitab.",
+    var TYPE_HEAD = NAR ? [
+"Kamu menyusun NASKAH KHOTBAH NARATIF lengkap gaya Gereja JB3 dari sebuah KISAH/narasi Alkitab.",
+"KHOTBAH NARATIF = khotbah yang BENTUKNYA mengikuti alur cerita (alur plot ala Eugene Lowry: keseimbangan terganggu → konflik makin rumit → titik balik/pembalikan → kabar baik Allah → antisipasi hidup baru), bukan daftar poin yang ditempel ke cerita. Pendengar diajak MASUK ke dalam cerita dan menemukan pesannya bersama tokoh-tokohnya; prinsip muncul dari dalam cerita.",
+"Prinsip penting khotbah naratif:",
+"- Kisah Alkitab adalah PUSAT, bukan ilustrasi. Tuturkan dengan hidup (latar, tokoh, ketegangan, dialog, emosi), tetapi SETIA pada teks: jangan menambah fakta/dialog seolah tertulis. Detail imajinatif boleh sebagai gambaran yang ditandai ('bayangkan…', 'mungkin…').",
+"- Perhatikan seni narasi Alkitab: kata kunci yang berulang (Leitwort), kata-kata PERTAMA tiap tokoh, pengulangan dengan variasi, dan apa yang sengaja TIDAK diceritakan narator.",
+"- Tokoh utama cerita Alkitab adalah ALLAH — tunjukkan apa yang Allah lakukan, bukan hanya teladan moral manusia (hindari khotbah 'jadilah seperti Daud' yang moralistis). Bila wajar, arahkan ke Kristus dalam metanarasi Penebusan.",
+"- Hubungkan jemaat ke dalam cerita: ketegangan tokoh ↔ ketegangan hidup jemaat hari ini, tanpa memaksa alegori.",
+"- Metode OIA tetap berlaku dalam bentuk naratif: Observasi dirangkai di bagian 2 Alur Cerita, Interpretasi = bagian 3 Titik Balik & bagian 4 Pesan, Aplikasi = bagian 5."
+    ] : TEKS ? [
+"Kamu menyusun NASKAH KHOTBAH TEKSTUAL lengkap gaya Gereja JB3.",
+"KHOTBAH TEKSTUAL = khotbah atas 1–2 AYAT pendek (maksimal ±3 ayat). TEMA dan SEMUA POIN UTAMA diambil langsung dari FRASA-FRASA ayat itu sendiri, berurutan sesuai teks — tiap poin berdiri di atas satu frasa kunci. Pengembangan tiap poin boleh memakai bagian Alkitab lain (kisah & ayat pendukung).",
+"Prinsip penting khotbah tekstual:",
+"- Ayat dibaca DI DALAM konteks perikop & kitabnya — jangan dipenggal menjadi slogan lepas; makna tiap frasa harus sama dengan maksud penulis aslinya.",
+"- Bila teks yang diberikan lebih dari ±3 ayat, pilih 1–2 ayat kuncinya, sebutkan pilihanmu di awal Observasi, dan sisanya jadi konteks.",
+"- Frasa-frasa dijadikan kerangka khotbah (biasanya 3–4 frasa = 3–4 poin); judul & tema khotbah juga dirumuskan dari ayat itu.",
+"- Janji/perintah yang ditujukan khusus kepada tokoh/kelompok tertentu jangan langsung dijadikan janji umum — tarik prinsipnya dengan jujur."
+    ] : ["Kamu menyusun NASKAH KHOTBAH lengkap gaya Gereja JB3 dari sebuah ayat/perikop Alkitab."];
+    var REF_EMPTY = NAR
+      ? "(TIDAK DIISI — pilihkan SATU KISAH/narasi Alkitab yang paling tepat berdasarkan tema, kategori, poin, kesempatan, atau naskah lama di bawah; bila semuanya kosong, pilih kisah yang kuat & relevan untuk jemaat JB3 saat ini. Sebutkan kisah & perikop pilihanmu di judul dan di Pendahuluan.)"
+      : TEKS
+      ? "(TIDAK DIISI — pilihkan 1–2 AYAT yang paling tepat berdasarkan tema, kategori, poin, kesempatan, atau naskah lama di bawah; bila semuanya kosong, pilih ayat yang kuat & relevan untuk jemaat JB3 saat ini. Sebutkan ayat pilihanmu di judul dan di Pendahuluan.)"
+      : "(TIDAK DIISI — pilihkan SATU perikop yang paling tepat berdasarkan tema, kategori, poin, kesempatan, atau naskah lama di bawah; bila semuanya kosong, pilih perikop yang kuat & relevan untuk jemaat JB3 saat ini. Sebutkan perikop pilihanmu di judul dan di kalimat pertama Pendahuluan.)";
+    var L=TYPE_HEAD.concat([
 "",
-"TEKS UTAMA: " + (o.ref || (o.imgCount ? "(tentukan dari gambar / poin terlampir)"
-  : "(TIDAK DIISI — pilihkan SATU perikop yang paling tepat berdasarkan tema, kategori, poin, kesempatan, atau naskah lama di bawah; bila semuanya kosong, pilih perikop yang kuat & relevan untuk jemaat JB3 saat ini. Sebutkan perikop pilihanmu di judul dan di kalimat pertama Pendahuluan.)")),
+"TEKS UTAMA: " + (o.ref ? o.ref + (NAR ? "  (bila yang ditulis nama kisah, tentukan dulu perikopnya yang tepat)" : "") : (o.imgCount ? "(tentukan dari gambar / poin terlampir)" : REF_EMPTY)),
 "TEMA / TOPIK: " + (o.topic ? o.topic : "(tentukan dari isi)"),
 "KATEGORI KHOTBAH: " + (o.cat || "Umum") + " — beri warna aplikasi & ilustrasi yang relevan dengan kategori ini, tanpa mengabaikan ranah lain.",
 "KESEMPATAN: " + (o.occ ? o.occ : "Ibadah Raya Gereja JB3"),
@@ -1718,12 +1753,15 @@ GAYA_TXT(),
 (gayaSel.length>1
   ? "PADUKAN gaya-gaya ini secara seimbang di SELURUH naskah (pendahuluan sampai aplikasi) — mis. bagian reflektif yang dalam diselingi humor & ilustrasi hidup — tanpa mengurangi struktur & kedalaman di bawah."
   : "Terapkan gaya ini di SELURUH naskah (pendahuluan sampai aplikasi), tanpa mengurangi struktur & kedalaman di bawah.")
-    ];
+    ]);
     if(o.dur){
       var W=o.dur*WPM;
+      var PORSI = NAR
+        ? (en ? "Introduction 10%, The Story 35%, Turning Point 15%, Message 20%, Application 20%" : "Pendahuluan 10%, Alur Cerita 35%, Titik Balik 15%, Pesan 20%, Aplikasi 20%")
+        : (en ? "Introduction 15%, Observation 25%, Interpretation 35%, Application 25%" : "Pendahuluan 15%, Observasi 25%, Interpretasi 35%, Aplikasi 25%");
       L.push("", en
-        ? "TARGET DURATION: " + o.dur + " minutes of preaching. Write about " + W + " words in total (speaking pace ±" + WPM + " words/minute), proportioned roughly: Introduction 15%, Observation 25%, Interpretation 35%, Application 25%. Do not pad to reach the length; trim points rather than rush them."
-        : "TARGET DURASI: " + o.dur + " menit berkhotbah. Tulis sekitar " + W + " kata total (kecepatan bicara ±" + WPM + " kata/menit), dengan porsi kira-kira: Pendahuluan 15%, Observasi 25%, Interpretasi 35%, Aplikasi 25%. Jangan diisi basa-basi demi panjang; lebih baik kurangi jumlah poin daripada terburu-buru.");
+        ? "TARGET DURATION: " + o.dur + " minutes of preaching. Write about " + W + " words in total (speaking pace ±" + WPM + " words/minute), proportioned roughly: " + PORSI + ". Do not pad to reach the length; trim points rather than rush them."
+        : "TARGET DURASI: " + o.dur + " menit berkhotbah. Tulis sekitar " + W + " kata total (kecepatan bicara ±" + WPM + " kata/menit), dengan porsi kira-kira: " + PORSI + ". Jangan diisi basa-basi demi panjang; lebih baik kurangi jumlah poin daripada terburu-buru.");
     }
     if(o.seriesCtx){
       L.push("", "BAGIAN DARI SERI KHOTBAH: " + o.seriesCtx + "\nSebut singkat posisi khotbah ini dalam seri di Pendahuluan (mis. 'Minggu lalu kita belajar … hari ini …') dan akhiri dengan jembatan singkat ke minggu berikutnya bila ada. Jangan mengulang isi minggu lain.");
@@ -1741,7 +1779,7 @@ GAYA_TXT(),
     }
     if(hasPts){
       L.push("",
-"POIN PRINSIP / INTERPRETASI DARI PENGGUNA (WAJIB DIPAKAI sebagai poin bagian 3 Interpretasi — jangan ganti, jangan tambah poin utama baru; KECUALI rumusannya bertentangan dengan LANDASAN PENGAJARAN di bawah: luruskan rumusannya & catat):");
+"POIN PRINSIP / INTERPRETASI DARI PENGGUNA (WAJIB DIPAKAI sebagai " + (NAR ? "poin-poin bagian 4 Pesan — munculkan dari dalam cerita" : TEKS ? "poin bagian 3 Interpretasi — kaitkan tiap poin dengan frasa ayat yang paling sesuai" : "poin bagian 3 Interpretasi") + " — jangan ganti, jangan tambah poin utama baru; KECUALI rumusannya bertentangan dengan LANDASAN PENGAJARAN di bawah: luruskan rumusannya & catat):");
       if(o.points && o.points.trim()) L.push(o.points.trim());
       if(o.imgCount && o.ref) L.push("(Poin tambahan ada di " + o.imgCount + " gambar/screenshot terlampir — baca, ekstrak teksnya, gabungkan dengan poin di atas. Jika gambar tak terbaca, katakan.)");
       L.push(
@@ -1757,13 +1795,87 @@ LANDASAN,
 "Riset & sumber:",
 "- Observasi: makna kata asli (Ibrani/Yunani), konteks sejarah & budaya zaman itu — dari pengetahuanmu tentang leksikon & komentari yang mapan. Bila sebuah tafsir diperdebatkan di kalangan ahli, sebutkan; jangan sajikan seolah pasti.",
 "- Ilustrasi / kisah tokoh / perusahaan / peristiwa & data penelitian: HANYA yang kamu yakin faktual & dikenal luas. JANGAN mengarang statistik, persentase, kutipan, tanggal, judul studi, atau detail. Bila tak ada kisah / temuan nyata yang benar-benar cocok & terverifikasi, pakai metafora/analogi umum (dan sebut itu ilustrasi), atau lewati — jangan memaksakan angka.",
-(hasPts ? "" : "- Interpretasi: tarik 3–5 poin/prinsip dari observasi. Tiap poin diteguhkan satu kisah Alkitab lain yang benar-benar relevan (idealnya dari kitab berbeda) — jelaskan hubungannya."),
+(hasPts ? "" : NAR ? "- Pesan: 2–4 prinsip yang MUNCUL dari alur cerita (bukan ditempel). Tiap prinsip boleh diteguhkan satu kisah/ayat Alkitab lain yang benar-benar relevan — jelaskan hubungannya."
+  : TEKS ? "- Interpretasi: poin-poin = frasa-frasa kunci ayat, berurutan. Tiap poin diteguhkan satu kisah Alkitab lain yang benar-benar relevan (idealnya dari kitab berbeda) — jelaskan hubungannya."
+  : "- Interpretasi: tarik 3–5 poin/prinsip dari observasi. Tiap poin diteguhkan satu kisah Alkitab lain yang benar-benar relevan (idealnya dari kitab berbeda) — jelaskan hubungannya."),
 "",
 LANGLINE,
 "",
 H[0],
 GREET
-    ], INTRO, [
+    ], INTRO);
+    var TAGLINE_EN = en
+  ? "- Give EVERY point one short, catchy English phrase that is easy to remember and relevant to the point — e.g. \"big enough to impact, small enough to care\", \"feedback is the breakfast of champions\". Original or a well-known saying; never put a real quote in someone's mouth unless you are sure they said it."
+  : "- Beri SETIAP poin satu kalimat pendek berbahasa INGGRIS yang menarik, relevan & mudah diingat pendengar (boleh di samping tagline Indonesianya) — mis. \"big enough to impact, small enough to care\", \"feedback is the breakfast of champions\". Boleh rumusan sendiri atau ungkapan yang dikenal; jangan mengatasnamakan tokoh kecuali yakin itu kutipannya.";
+    var CHECK = "Sebelum selesai, periksa diam-diam seluruh naskah terhadap LANDASAN PENGAJARAN & alur OIA; perbaiki yang tidak selaras (jangan tampilkan proses pemeriksaan ini).";
+    if(NAR){
+      var HN = en
+        ? ["## 1. Introduction","## 2. The Story","## 3. The Turning Point","## 4. The Message for Us","## 5. Application (Take Actions)"]
+        : ["## 1. Pendahuluan","## 2. Alur Cerita","## 3. Titik Balik","## 4. Pesan untuk Kita","## 5. Aplikasi (Take Actions)"];
+      // HN[0] sama dengan H[0] (sudah ada di L); struktur 5 bagian khusus naratif
+      return L.concat([
+"- Akhiri pendahuluan dengan MENGANGKAT KETEGANGAN: satu pergumulan/pertanyaan hidup jemaat hari ini yang nanti terjawab lewat cerita — lalu bawa jemaat masuk ke dunia cerita.",
+"",
+HN[1],
+"- Tuturkan kisahnya babak demi babak (sub-judul '### ' per adegan boleh dipakai): latar tempat & waktu, tokoh, apa yang mereka inginkan/takutkan, konflik yang makin rumit.",
+QUOTE.replace("Kutip ayat/perikop teks utama", "Kutip ayat-ayat KUNCI").replace("Quote the main passage", "Quote the KEY verses"),
+"- Sisipkan Observasi DI DALAM alur (bukan daftar terpisah): 1–3 kata asli Ibrani/Yunani + transliterasi yang menerangi adegan; adat, budaya & situasi zaman itu yang membuat cerita lebih hidup; kata kunci yang berulang, kata-kata pertama tokoh, dan apa yang tidak diceritakan narator.",
+"- Setia pada teks: tandai imajinasi sebagai gambaran ('bayangkan…'); sebut bila sebuah detail diperdebatkan.",
+"- Bawa ketegangan sampai puncaknya — jangan buru-buru memberi jawaban.",
+"",
+HN[2],
+"- Momen pembalikan dalam cerita: di mana ALLAH bertindak / apa yang mengubah keadaan. Tunjukkan kabar baiknya (karya & karakter Allah; bila wajar, arah ke Kristus).",
+"- Rumuskan IDE BESAR khotbah dalam SATU kalimat yang mudah diingat (cetak tebal).",
+"- Bila kisah punya kelanjutan penting (akhir tragis / pemulihan), sertakan — jangan dipotong.",
+"",
+HN[3],
+(hasPts
+  ? "- Gunakan poin-poin prinsip dari pengguna sebagai 2–4 pesan, berurutan; tunjukkan dari bagian cerita mana tiap pesan lahir."
+  : "- 2–4 pesan/prinsip yang lahir dari cerita (tiap pesan menyebut adegan asalnya). Tiap pesan: tagline yang mudah diingat + penjelasan singkat + satu kisah/ayat Alkitab lain yang meneguhkan (jelaskan hubungannya)."),
+TAGLINE_EN,
+"- Jaga nuansa cerita: tetap bertutur, bukan berubah jadi kuliah.",
+"",
+HN[4],
+"- Untuk tiap pesan, turunkan langkah aplikasi konkret (aplikasi lahir dari pesan cerita, bukan nasihat umum).",
+RANAH,
+CLOSE + (en ? " Where fitting, close by returning to an image from the story." : " Bila cocok, tutup dengan kembali ke satu gambaran dari cerita."),
+"",
+CHECK,
+TAIL
+      ]).join("\n").replace(/\n{3,}/g,"\n\n").trim();
+    }
+    if(TEKS){
+      var HT = en
+        ? ["## 1. Introduction","## 2. Observation of the Text","## 3. Interpretation (Phrase by Phrase)","## 4. Application (Take Actions)"]
+        : ["## 1. Pendahuluan","## 2. Observasi Teks","## 3. Interpretasi (Frasa demi Frasa)","## 4. Aplikasi (Take Actions)"];
+      return L.concat([
+"- Tutup dengan membacakan ayat utama dan menyebut pertanyaan/ketegangan yang akan dijawab ayat ini.",
+"",
+HT[1],
+QUOTE.replace("Kutip ayat/perikop teks utama", "Kutip AYAT utama (1–2 ayat)").replace("Quote the main passage", "Quote the main VERSE(S)"),
+"- Konteks singkat: perikop & kitab tempat ayat ini berada, siapa berbicara kepada siapa, dalam situasi apa — supaya ayat tidak dilepas dari konteksnya.",
+"- Pecah ayat menjadi 3–4 FRASA KUNCI (berurutan sesuai teks) dan tampilkan sebagai daftar. Untuk tiap frasa: kata asli Ibrani/Yunani + transliterasi, makna harfiah, nuansa yang penting.",
+"- Rumuskan TEMA khotbah dalam satu kalimat yang diambil dari ayat itu (cetak tebal).",
+"- Tandai eksplisit bila ada makna/terjemahan yang diperdebatkan.",
+"",
+HT[2],
+(hasPts
+  ? "- Gunakan poin-poin prinsip dari pengguna sebagai poin bagian ini, berurutan; tiap poin dikaitkan ke frasa ayat yang paling sesuai (sebut frasanya)."
+  : "- Satu poin untuk tiap frasa kunci, BERURUTAN sesuai ayat. Judul tiap poin ('### ') memuat frasa ayat dalam tanda kutip + tagline yang mudah diingat."),
+"- Tiap poin: penjelasan makna frasa itu dalam konteksnya → dikembangkan dengan satu kisah Alkitab lain (kitab berbeda) + ayat pendukung (jelaskan hubungannya) → kembali ke frasa ayat.",
+TAGLINE_EN,
+"- Poin-poin harus terasa sebagai satu kesatuan yang membangun TEMA ayat, bukan potongan lepas.",
+"",
+HT[3],
+"- Untuk tiap poin/frasa, turunkan langkah aplikasi konkret (OIA: aplikasi lahir dari interpretasi, bukan nasihat umum).",
+RANAH,
+CLOSE + (en ? " End by reading the verse once more as a summary." : " Akhiri dengan membacakan ayat itu sekali lagi sebagai rangkuman."),
+"",
+CHECK,
+TAIL
+      ]).join("\n").replace(/\n{3,}/g,"\n\n").trim();
+    }
+    L = L.concat([
 "- Tutup dengan menyebut teks utama dan ketegangan/pertanyaan yang akan dijawab khotbah.",
 "",
 H[1],
@@ -2682,7 +2794,7 @@ TAIL
         toast("Tersimpan di folder Eksegese");
         return;
       }
-      currentHistId = addHist(o.ref || plainTitle(res.text), [o.lang==="en"?"EN":"", [].concat(o.gaya||[]).map(function(k){ return GAYA_LABEL[k]; }).join("+"), o.topic, o.occ, o.points?"+poin":"", o.imgCount?"+"+o.imgCount+" gambar":""].filter(Boolean).join(" · "), res.text, o.cat);
+      currentHistId = addHist(o.ref || plainTitle(res.text), [o.mode==="naratif"?"Naratif":o.mode==="tekstual"?"Tekstual":"", o.lang==="en"?"EN":"", [].concat(o.gaya||[]).map(function(k){ return GAYA_LABEL[k]; }).join("+"), o.topic, o.occ, o.points?"+poin":"", o.imgCount?"+"+o.imgCount+" gambar":""].filter(Boolean).join(" · "), res.text, o.cat);
       currentCat = o.cat || "Umum";
       afterCompose(currentHistId, o);
       if(currentView==="read"){ renderResult(res.text, { done:true, truncated:res.truncated }); scrollTop(); }
@@ -3777,17 +3889,29 @@ used.length ? "Perikop/judul yang SUDAH ADA di arsip pengkhotbah (hindari, kecua
   $("#catPick").innerHTML = catPickHtml(composeCat);
   wireCatPick($("#catPick"), function(c){ composeCat=c; lastOpts=null; });
   var JENIS_HELP={ ayat:"Surat, nubuat, puisi, ucapan Yesus: alur argumen lewat kata sambung, kata kerja utama, kata asli.", cerita:"Kisah/narasi: adegan, kata kunci yang berulang, dialog tokoh, apa yang tidak diceritakan narator." };
+  var MODE_TXT={
+    khotbah:{ h:"Susun khotbah baru", p:"Isi teks utama &mdash; Claude menyusun naskah empat bagian gaya JB3.", ph:"mis. Yohanes 15:1–8  ·  Filipi 2:1–11  ·  Lukas 15:11–32", help:"" },
+    naratif:{ h:"Khotbah naratif", p:"Khotbah yang mengalir mengikuti alur kisah Alkitab &mdash; ketegangan, titik balik, lalu pesannya.", ph:"mis. Lukas 15:11–32  ·  1 Samuel 17  ·  Kisah Yusuf dan saudara-saudaranya",
+      help:"Untuk KISAH Alkitab. Alur: Pendahuluan → Alur Cerita → Titik Balik → Pesan untuk Kita → Aplikasi. Kata asli & adat zaman itu dirangkai di dalam cerita." },
+    tekstual:{ h:"Khotbah tekstual", p:"Khotbah atas 1–2 ayat &mdash; poin-poinnya diambil dari frasa ayat itu sendiri.", ph:"mis. Yohanes 3:16  ·  Amsal 3:5–6  ·  Mikha 6:8",
+      help:"Untuk 1–2 AYAT pendek. Ayat dipecah jadi 3–4 frasa kunci; tiap frasa = satu poin, berurutan sesuai teks." },
+    eksegese:{ h:"Eksegese / observasi", p:"Studi pengamatan perikop: penulis, penerima, konteks, kata asli, adat zaman itu &mdash; lalu prinsipnya.", ph:"mis. Rut 1:1–22  ·  Roma 5:1–11  ·  Kisah Daud dan Goliat", help:"" }
+  };
   function applyMode(){
+    var MT=MODE_TXT[mode]||MODE_TXT.khotbah;
     $("#composer").classList.toggle("eks", mode==="eksegese");
+    $("#composer").classList.toggle("m-naratif", mode==="naratif");
+    $("#composer").classList.toggle("m-tekstual", mode==="tekstual");
+    $("#modeHelp").textContent=MT.help;
     Array.prototype.forEach.call($("#modeSeg").querySelectorAll("button"), function(b){ b.setAttribute("aria-pressed", b.dataset.v===mode?"true":"false"); });
     Array.prototype.forEach.call($("#jenisSeg").querySelectorAll("button"), function(b){ b.setAttribute("aria-pressed", b.dataset.v===jenis?"true":"false"); });
     $("#jenisHelp").textContent=JENIS_HELP[jenis];
     var ist=$("#introStage"); if(ist) ist.hidden = (mode==="eksegese" && !!sampleFn);
-    if(sampleFn) goBtn.textContent = mode==="eksegese" ? "Buat eksegese" : "Susun khotbah";
-    refEl.placeholder = mode==="eksegese" ? "mis. Rut 1:1–22  ·  Roma 5:1–11  ·  Kisah Daud dan Goliat" : "mis. Yohanes 15:1–8  ·  Filipi 2:1–11  ·  Lukas 15:11–32";
+    if(sampleFn) goBtn.textContent = mode==="eksegese" ? "Buat eksegese" : mode==="naratif" ? "Susun khotbah naratif" : mode==="tekstual" ? "Susun khotbah tekstual" : "Susun khotbah";
+    refEl.placeholder = MT.ph;
     var sh=document.querySelector("#view-compose .screenhead");
-    if(sh && sampleFn){ sh.querySelector("h2").textContent = mode==="eksegese" ? "Eksegese / observasi" : "Susun khotbah baru";
-      sh.querySelector("p").innerHTML = mode==="eksegese" ? "Studi pengamatan perikop: penulis, penerima, konteks, kata asli, adat zaman itu &mdash; lalu prinsipnya." : "Isi teks utama &mdash; Claude menyusun naskah empat bagian gaya JB3."; }
+    if(sh && sampleFn){ sh.querySelector("h2").textContent = MT.h;
+      sh.querySelector("p").innerHTML = MT.p; }
   }
   Array.prototype.forEach.call($("#modeSeg").querySelectorAll("button"), function(b){ b.onclick=function(){ mode=b.dataset.v; lastOpts=null; try{ localStorage.setItem("susunkhotbah.mode",mode); }catch(e){} applyMode(); }; });
   Array.prototype.forEach.call($("#jenisSeg").querySelectorAll("button"), function(b){ b.onclick=function(){ jenis=b.dataset.v; lastOpts=null; try{ localStorage.setItem("susunkhotbah.jenis",jenis); }catch(e){} applyMode(); }; });
@@ -3831,7 +3955,7 @@ used.length ? "Perikop/judul yang SUDAH ADA di arsip pengkhotbah (hindari, kecua
     var h2=document.querySelector("#view-compose .screenhead h2"); if(h2) h2.textContent="Susun khotbah & eksegese";
     goBtn.disabled=false; goBtn.textContent="Susun di Claude ↗";
     goBtn.onclick=function(e){ e.stopImmediatePropagation(); window.open(CLAUDE_URL,"_blank","noopener"); };
-    hint.innerHTML="Di Claude, pilih <b>Khotbah</b> atau <b>Eksegese</b> di atas formulir. Setelah hasilnya jadi, ketuk <b>Kirim ke JB3 Kotbah</b> &mdash; otomatis masuk ke arsip di sini (eksegese ke folder <b>Eksegese</b>).";
+    hint.innerHTML="Di Claude, pilih <b>Khotbah</b>, <b>Naratif</b>, <b>Tekstual</b>, atau <b>Eksegese</b> di atas formulir. Setelah hasilnya jadi, ketuk <b>Kirim ke JB3 Kotbah</b> &mdash; otomatis masuk ke arsip di sini (eksegese ke folder <b>Eksegese</b>).";
   }
 
   $("#ptsFile").onclick=function(){ pickFileInto(pointsEl, this); };
