@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Brief Pagi</title>
+<meta name="theme-color" content="#004E63">
+<meta name="apple-mobile-web-app-title" content="Brief Pagi">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" type="image/png" sizes="48x48" href="./favicon.png?v=1">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png?v=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;700;800&display=swap">
+<style>
+  :root{--bg:#FFFFFF;--ink:#13262C;--muted:#5C6B70;--accent:#004E63}
+  @media (prefers-color-scheme: dark){:root{--bg:#0D1B1F;--ink:#E6F0F2;--muted:#9DB0B5;--accent:#5CC6C3}}
+  html,body{height:100%;margin:0}
+  body{background:var(--bg);color:var(--ink);font:400 16px/1.5 "Figtree",system-ui,sans-serif;display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;text-align:center}
+  .box{display:flex;flex-direction:column;align-items:center;gap:14px;max-width:22rem}
+  img{width:120px;height:120px;border-radius:22.5%;box-shadow:0 6px 20px rgb(0 0 0 / .15)}
+  h1{font:800 26px var(--f,"Figtree",system-ui);margin:0}
+  p{margin:0;color:var(--muted)}
+  a.btn{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;font-weight:700;padding:12px 22px;border-radius:12px}
+</style>
+</head>
+<body>
+<div class="box">
+  <img src="./icon-512.png?v=1" alt="Logo Brief Pagi JB3">
+  <h1>Brief Pagi</h1>
+  <p id="msg">Membuka brief hari ini…</p>
+  <a class="btn" id="go" href="https://claude.ai/artifact/NXiDD9ooFZKfev7uegApkR">Buka Brief Pagi</a>
+</div>
+<script>
+  // Ikon layar utama ini membuka Brief Pagi di claude.ai (perlu masuk akun Claude).
+  setTimeout(function(){ location.href = document.getElementById("go").href; }, 600);
+</script>
+</body>
+</html>
