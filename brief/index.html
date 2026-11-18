@@ -27,12 +27,18 @@
 <div class="box">
   <img src="./icon-512.png?v=1" alt="Logo Brief Pagi JB3">
   <h1>Brief Pagi</h1>
-  <p id="msg">Membuka brief hari ini…</p>
+  <p id="msg">Pasang ikon ini di layar utama: tekan <b>Bagikan ⬆︎</b> lalu <b>Tambah ke Layar Utama</b> (Android: menu ⋮ → Tambahkan ke layar utama). Lakukan di halaman ini, bukan setelah pindah ke claude.ai.</p>
   <a class="btn" id="go" href="https://claude.ai/artifact/NXiDD9ooFZKfev7uegApkR">Buka Brief Pagi</a>
 </div>
 <script>
-  // Ikon layar utama ini membuka Brief Pagi di claude.ai (perlu masuk akun Claude).
-  setTimeout(function(){ location.href = document.getElementById("go").href; }, 600);
+  // Pindah otomatis HANYA bila dibuka dari ikon layar utama (mode standalone),
+  // supaya di browser biasa "Tambah ke Layar Utama" memakai ikon Brief Pagi, bukan ikon claude.ai.
+  var standalone = window.navigator.standalone === true ||
+    (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
+  if (standalone) {
+    document.getElementById("msg").textContent = "Membuka brief hari ini…";
+    setTimeout(function(){ location.href = document.getElementById("go").href; }, 400);
+  }
 </script>
 </body>
 </html>
