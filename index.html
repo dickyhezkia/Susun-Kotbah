@@ -2607,6 +2607,8 @@ TAIL
 
   /* ---------- pasang di HP (Safari → Layar Utama) ---------- */
   var CLAUDE_URL="https://claude.ai/artifact/Ewfky77oSF2rYrTWiyKERT";
+  var BRIDGE=false;   // true di situs (tanpa sample): Susun langsung membuka Claude
+  function openClaude(){ window.open(CLAUDE_URL,"_blank","noopener"); }
   var SITE_URL="https://susun-kotbah.dickyhezkia.workers.dev/";
   var APP_URL=SITE_URL;
   function isStandalone(){
@@ -2907,7 +2909,7 @@ TAIL
     html+=installCardHtml()+safeCardHtml();
     $("#homeStage").innerHTML=html;
     var hs=$("#homeStage");
-    $("#hNew").onclick=function(){ showView("compose"); try{ refEl.focus(); }catch(e){} };
+    $("#hNew").onclick=function(){ if(BRIDGE){ openClaude(); return; } showView("compose"); try{ refEl.focus(); }catch(e){} };
     wireCards(hs, "home");
     hs.querySelectorAll("[data-go]").forEach(function(b){ b.onclick=function(){
       var g=b.dataset.go; savedQuery=""; openFolder = g==="folders" ? null : g; showView("saved");
@@ -3876,6 +3878,7 @@ used.length ? "Perikop/judul yang SUDAH ADA di arsip pengkhotbah (hindari, kecua
 
   tabnav.addEventListener("click", function(e){
     var b=e.target.closest("button"); if(!b || !b.dataset.view) return;
+    if(b.dataset.view==="compose" && BRIDGE){ openClaude(); return; }   // situs: langsung ke Claude
     if(b.dataset.view==="saved" && currentView==="saved"){ openFolder=null; savedQuery=""; }
     showView(b.dataset.view);
   });
@@ -3949,6 +3952,7 @@ used.length ? "Perikop/judul yang SUDAH ADA di arsip pengkhotbah (hindari, kecua
     })
     .catch(function(){ bridgeMode(); });
   function bridgeMode(){
+    BRIDGE=true;
     $("#composer").classList.add("bridge");
     var sh=document.querySelector("#view-compose .screenhead p");
     if(sh) sh.textContent="Naskah khotbah dan eksegese disusun oleh Claude di claude.ai (memakai langganan Claude-mu), lalu dikirim balik ke arsip JB3 Kotbah.";
