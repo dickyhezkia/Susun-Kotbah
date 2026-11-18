@@ -901,6 +901,7 @@
         <button type="button" data-v="cerita" aria-pressed="true">Cerita nyata</button>
         <button type="button" data-v="riset" aria-pressed="false">Riset</button>
         <button type="button" data-v="games" aria-pressed="false">Games</button>
+        <button type="button" data-v="4p" aria-pressed="false">Metode 4P</button>
         <button type="button" data-v="tanpa" aria-pressed="false">Tanpa pembuka</button>
       </div>
       <div class="help" id="introHelp"></div>
@@ -1158,7 +1159,7 @@ window.__SK_STORE__ = (function(){
     try{ var v=(localStorage.getItem(k)||"").split(","), r=ok.filter(function(x){ return v.indexOf(x)>=0; }); return r.length ? r : d; }
     catch(e){ return d; }
   }
-  var GAYA_OPTS=["serius","lucu","atraktif","ekspositori","tekstual","storytelling","profetik","inspiratif","pastoral","apologetik"], INTRO_OPTS=["cerita","riset","games","tanpa"];
+  var GAYA_OPTS=["serius","lucu","atraktif","ekspositori","tekstual","storytelling","profetik","inspiratif","pastoral","apologetik"], INTRO_OPTS=["cerita","riset","games","4p","tanpa"];
   var gaya  = lsGetMulti("susunkhotbah.gaya",  GAYA_OPTS,  ["serius"]);
   var intro = lsGetMulti("susunkhotbah.intro", INTRO_OPTS, ["cerita"]);
 
@@ -1674,10 +1675,29 @@ window.__SK_STORE__ = (function(){
     if(introSel.indexOf("cerita")>=0) INTRO.push(STORY);
     if(introSel.indexOf("riset")>=0)  INTRO.push(RESEARCH);
     if(introSel.indexOf("games")>=0)  INTRO.push(GAMES);
+    if(introSel.indexOf("4p")>=0){
+      var P4 = en ? [
+"- Build the introduction with the 4P METHOD, in this order, as ONE flowing spoken introduction. Start each part's paragraph with a short bold label (**Problem**, **Pain**, **Proof**, **Promise**) so the preacher can see the flow:",
+"  1. PROBLEM — name one concrete, everyday problem/struggle the congregation really faces that this text addresses (specific, recognisable — not abstract).",
+"  2. PAIN — make it felt: what it costs us if left unresolved (in personal life, family, work, ministry); honest and empathetic, never shaming or exaggerated.",
+"  3. PROOF — show the problem is real and common: a true story, a well-known figure/event, or a research finding (finding + institution + year; only if you are sure it is real — never invent data). Briefly, Scripture can show people in the Bible faced it too.",
+"  4. PROMISE — what God's Word in today's text offers for this problem: a hope grounded in who God is and what the text actually says (no prosperity/'name-it-claim-it' promises, no promising what the text does not promise). End by naming the main text and inviting the congregation into it."
+      ] : [
+"- Susun pendahuluan dengan METODE 4P, berurutan, sebagai SATU pendahuluan lisan yang mengalir. Awali paragraf tiap bagian dengan label tebal singkat (**Problem**, **Pain**, **Proof**, **Promise**) supaya pengkhotbah melihat alurnya:",
+"  1. PROBLEM — angkat satu masalah/pergumulan nyata sehari-hari yang benar-benar dihadapi jemaat dan dijawab oleh teks ini (spesifik & mudah dikenali, bukan abstrak).",
+"  2. PAIN — buat masalah itu terasa: apa harganya bila dibiarkan (dalam hidup pribadi, keluarga, pekerjaan, pelayanan); jujur & empatik, tidak mempermalukan, tidak dilebih-lebihkan.",
+"  3. PROOF — tunjukkan masalah itu nyata & umum: cerita nyata, tokoh/peristiwa yang dikenal, atau temuan riset (isi temuan + lembaga + tahun; HANYA yang kamu yakin nyata — jangan mengarang data). Boleh singkat menyebut tokoh Alkitab yang juga mengalaminya.",
+"  4. PROMISE — apa yang Firman dalam teks hari ini tawarkan untuk masalah itu: pengharapan yang bertumpu pada siapa Allah & apa yang sungguh dikatakan teks (bukan janji kemakmuran / name-it-claim-it, jangan menjanjikan yang tidak dijanjikan teks). Tutup dengan menyebut teks utama & mengajak jemaat masuk ke dalamnya."
+      ];
+      if(INTRO.length) P4.push(en
+        ? "- Use the other opener(s) selected above INSIDE the 4P flow (a true story / research data as the Proof, a checklist game at the Problem) — not as separate segments."
+        : "- Pakai pembuka lain yang juga dipilih di atas DI DALAM alur 4P (cerita nyata / data riset sebagai Proof, games checklist di bagian Problem) — bukan segmen terpisah.");
+      INTRO = INTRO.concat(P4);
+    }
     if(introSel.indexOf("tanpa")>=0) INTRO=[en
       ? "- NO extra opener: right after the greeting, go straight into the main text (no story, research data, or game)."
       : "- TANPA pembuka tambahan: setelah salam, langsung masuk ke teks utama (tanpa cerita, data riset, atau games)."];
-    if(INTRO.length>1) INTRO.push(en
+    if(INTRO.length>1 && introSel.indexOf("4p")<0) INTRO.push(en
       ? "- Weave these " + INTRO.length + " openers into ONE flowing introduction (natural transitions, no list of disconnected segments) and keep the introduction proportionate — it must not overshadow the rest of the sermon."
       : "- Rangkai " + INTRO.length + " pembuka di atas jadi SATU pendahuluan yang mengalir (transisi alami, bukan potongan-potongan terpisah) dan jaga porsinya — pendahuluan tidak boleh mengalahkan isi khotbah.");
     var STYLE = {
@@ -3179,13 +3199,14 @@ TAIL
     apologetik:"menjawab keberatan zaman ini"
   };
   // "Tanpa pembuka" meniadakan pembuka lain, dan sebaliknya
-  var INTRO_EXCL={ tanpa:["cerita","riset","games"], cerita:"tanpa", riset:"tanpa", games:"tanpa" };
+  var INTRO_EXCL={ tanpa:["cerita","riset","games","4p"], cerita:"tanpa", riset:"tanpa", games:"tanpa", "4p":"tanpa" };
   // Ekspositori & Tekstual saling meniadakan (keduanya menentukan cara teks diolah)
   var GAYA_EXCL={ ekspositori:"tekstual", tekstual:"ekspositori" };
   var INTRO_HELP={
     cerita:"cerita nyata / kisah tokoh",
     riset:"data riset (temuan + lembaga + tahun)",
     games:"games checklist ☐ untuk jemaat",
+    "4p":"4P: Problem → Pain → Proof → Promise",
     tanpa:"tanpa pembuka — setelah salam langsung ke teks"
   };
   // boleh pilih lebih dari satu; minimal satu tetap terpilih
